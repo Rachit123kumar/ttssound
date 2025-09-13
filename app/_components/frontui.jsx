@@ -1,68 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Link from 'next/link'; // Import the Link component
 
-// Utility function to convert Base64 string to ArrayBuffer
-function base64ToArrayBuffer(base64) {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-
-// Utility function to pack PCM data into a WAV file format
-function pcmToWav(pcm16, sampleRate = 16000) {
-    const numSamples = pcm16.length;
-    const buffer = new ArrayBuffer(44 + numSamples * 2);
-    const view = new DataView(buffer);
-
-    // RIFF identifier
-    writeString(view, 0, 'RIFF');
-    // file length
-    view.setUint32(4, 36 + numSamples * 2, true);
-    // RIFF type
-    writeString(view, 8, 'WAVE');
-    // format chunk identifier
-    writeString(view, 12, 'fmt ');
-    // format chunk length
-    view.setUint32(16, 16, true);
-    // sample format (1 = PCM)
-    view.setUint16(20, 1, true);
-    // number of channels
-    view.setUint16(22, 1, true);
-    // sample rate
-    view.setUint32(24, sampleRate, true);
-    // byte rate
-    view.setUint32(28, sampleRate * 2, true);
-    // block align
-    view.setUint16(32, 2, true);
-    // bits per sample
-    view.setUint16(34, 16, true);
-    // data chunk identifier
-    writeString(view, 36, 'data');
-    // data chunk length
-    view.setUint32(40, numSamples * 2, true);
-
-    // write the PCM samples
-    let offset = 44;
-    for (let i = 0; i < numSamples; i++) {
-        view.setInt16(offset, pcm16[i], true);
-        offset += 2;
-    }
-
-    return new Blob([view], { type: 'audio/wav' });
-
-    function writeString(view, offset, string) {
-        for (let i = 0; i < string.length; i++) {
-            view.setUint8(offset + i, string.charCodeAt(i));
-        }
-    }
-}
-
-// Custom message box function
+// Custom message box function (kept for user feedback on other actions)
 const showMessage = (message, type = 'info') => {
     const existingMsg = document.getElementById('status-message');
     if (existingMsg) existingMsg.remove();
@@ -85,160 +26,52 @@ const showMessage = (message, type = 'info') => {
 };
 
 export default function Home() {
-    const [textInput, setTextInput] = useState('');
-    const [voiceSelect, setVoiceSelect] = useState('Zephyr');
-    const [isLoading, setIsLoading] = useState(false);
-    const [audioQueue, setAudioQueue] = useState([]);
-    const [mergedAudioBlob, setMergedAudioBlob] = useState(null);
-    const [currentEmotionPrefix, setCurrentEmotionPrefix] = useState("");
-    const [selectedAudios, setSelectedAudios] = useState([]);
-        const [isMenuOpen, setIsMenuOpen] = useState(false);
+    // State for mobile menu
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const emotions = [
-        { label: "Cheerful", prefix: "Say cheerfully:" },
-        { label: "Sad", prefix: "Say in a sad tone:" },
-        { label: "Playful", prefix: "Say in a playful tone:" },
-        { label: "Serious", prefix: "Say in a serious tone:" },
-        { label: "Low Voice", prefix: "Say in a low voice:" },
-        { label: "Angry Mood", prefix: "Say in an angry tone:" },
-        { label: "High Volume", prefix: "Say loudly:" },
-        { label: "Laughing", prefix: "Say with a laugh:" },
-        { label: "Crying", prefix: "Say with a crying tone:" },
-        { label: "Sleepy", prefix: "Say in a sleepy tone:" },
-        { label: "Clear", prefix: "" },
+    // Hardcoded audio data
+    const audioClips = [
+        {
+            id: 'clip-1',
+            // The Hindi dialogue provided by the user
+            text: 'एक पुरानी तस्वीर मेरे हाथ में थी। धुंधली, किनारों से फटी हुई, पर उसमें कैद वो पल आज भी मेरे ज़हन में ताज़ा था। वो बारिश की शाम थी, जब मैं और मेरी माँ गाँव के उस कच्चे रास्ते पर चले जा रहे थे। मेरे नंगे पाँव मिट्टी में धँस रहे थे और माँ का आँचल मेरे सिर पर था। हवा बहुत तेज़ थी, पेड़ों की पत्तियाँ नाच रही थीं और आसमान में बिजलियाँ चमक रही थीं। माँ ने मेरा हाथ कसकर पकड़ रखा था।',
+            // The new audio URL
+            url: 'https://pub-105fec70566540d1a4cf3698e960bfa4.r2.dev/speech/01dd11b1-c61d-4bff-9dd1-44f631015430.mp3',
+        },
     ];
 
-    const handleGenerateAudio = async () => {
-        const text = textInput.trim();
-        if (!text) {
-            showMessage('Please enter some text to generate audio.');
-            return;
-        }
+    // Placeholder functions since generation is removed
+    const handleGenerateAudio = () => showMessage('Audio generation is currently disabled on the demo.', 'info');
+    const handleMergeSelected = () => showMessage('Audio merging is not available on the demo.', 'info');
 
-        setIsLoading(true);
-
-        try {
-            const res = await fetch('/api/tts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: currentEmotionPrefix + text, voice: voiceSelect }),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Failed to generate audio');
-            }
-
-            const data = await res.json();
-            const audioData = data.audioData;
-            const mimeType = data.mimeType;
-            const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
-            const pcmData = base64ToArrayBuffer(audioData);
-            const pcm16 = new Int16Array(pcmData);
-            const wavBlob = pcmToWav(pcm16, sampleRate);
-            const audioUrl = URL.createObjectURL(wavBlob);
-
-            const newAudio = {
-                id: Date.now(),
-                text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
-                url: audioUrl,
-                blob: wavBlob
-            };
-            setAudioQueue(prevQueue => [...prevQueue, newAudio]);
-
-        } catch (error) {
-            console.error("Error generating audio:", error);
-            showMessage(`Error: ${error.message}`, 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleMergeSelected = async () => {
-        if (selectedAudios.length < 2) return;
-
-        showMessage('Merging audio files...');
-
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const buffers = [];
-
-        try {
-            const selectedItems = audioQueue.filter(item => selectedAudios.includes(item.id));
-            for (const item of selectedItems) {
-                const arrayBuffer = await item.blob.arrayBuffer();
-                const decodedAudio = await audioContext.decodeAudioData(arrayBuffer);
-                buffers.push(decodedAudio);
-            }
-
-            const totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0);
-            const mergedBuffer = audioContext.createBuffer(1, totalLength, audioContext.sampleRate);
-            let offset = 0;
-            for (const buffer of buffers) {
-                mergedBuffer.copyToChannel(buffer.getChannelData(0), 0, offset);
-                offset += buffer.length;
-            }
-
-            const float32Data = mergedBuffer.getChannelData(0);
-            const pcm16 = new Int16Array(float32Data.length);
-            for (let i = 0; i < float32Data.length; i++) {
-                pcm16[i] = Math.max(-1, Math.min(1, float32Data[i])) * 0x7FFF;
-            }
-
-            const newMergedBlob = pcmToWav(pcm16, audioContext.sampleRate);
-            setMergedAudioBlob(newMergedBlob);
-            showMessage('Audio merged successfully!', 'success');
-
-        } catch (error) {
-            console.error("Error merging audio:", error);
-            showMessage('Failed to merge audio. Please check console for details.', 'error');
-        }
-    };
-
-    const handleDownloadBlob = (blob, filename) => {
-        const url = URL.createObjectURL(blob);
+    // A simple function to handle the download
+    const handleDownload = (url, filename) => {
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const handleDeleteAudio = (id) => {
-        const audioToDelete = audioQueue.find(item => item.id === id);
-        if (audioToDelete) {
-            URL.revokeObjectURL(audioToDelete.url);
-            setAudioQueue(prevQueue => prevQueue.filter(item => item.id !== id));
-            setSelectedAudios(prevSelected => prevSelected.filter(audioId => audioId !== id));
-            showMessage('Audio clip deleted.', 'info');
-        }
-    };
-
-    const handleCheckboxChange = (id) => {
-        setSelectedAudios(prevSelected => {
-            if (prevSelected.includes(id)) {
-                return prevSelected.filter(audioId => audioId !== id);
-            } else {
-                return [...prevSelected, id];
-            }
-        });
+        showMessage('Download started!', 'success');
     };
 
     return (
         <main className="min-h-screen bg-gray-100 antialiased">
-
-{/* /navBar section */}
-      <nav className="bg-white shadow-lg fixed w-full z-50">
-                <div className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center">
+            {/* SEO: Semantic tags and ARIA attributes */}
+            {/* The nav bar has a more descriptive ARIA label for accessibility */}
+            <header className="bg-white shadow-lg fixed w-full z-50">
+                <nav className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center" role="navigation" aria-label="Main navigation">
                     <div className="flex items-center justify-between">
-                        <a href="#" className="text-3xl font-extrabold text-indigo-700 tracking-tight">Hearo</a>
+                        {/* SEO: Use a strong title for branding */}
+                        <a href="/" className="text-3xl font-extrabold text-indigo-700 tracking-tight" aria-label="Hearo homepage">
+                            Hearo
+                        </a>
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="text-gray-600 focus:outline-none focus:text-gray-800 md:hidden"
-                            aria-label="Toggle navigation"
+                            aria-expanded={isMenuOpen}
+                            aria-controls="main-menu"
+                            aria-label="Toggle main menu"
                         >
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 {isMenuOpen ? (
@@ -250,38 +83,39 @@ export default function Home() {
                         </button>
                     </div>
 
-                    <div className={`md:flex items-center space-x-8 mt-4 md:mt-0 ${isMenuOpen ? 'block' : 'hidden'}`}>
-                        <a href="#voice-generator" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Generate</a>
+                    <div id="main-menu" className={`md:flex items-center space-x-8 mt-4 md:mt-0 ${isMenuOpen ? 'block' : 'hidden'}`}>
+                        <Link href="/azure" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Generate</Link>
                         <a href="#features" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Features</a>
                         <a href="#how-it-works" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">How It Works</a>
                         <a href="#contact" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Contact</a>
                     </div>
-                </div>
-            </nav>
-
-
-
+                </nav>
+            </header>
 
             {/* Hero Section */}
             <section className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white py-24 px-4 sm:px-6 lg:px-8 text-center rounded-b-[40px] shadow-xl">
                 <div className="container mx-auto max-w-4xl">
+                    {/* SEO: H1 for the main topic */}
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Generate AI Voices in Any Mood</h1>
+                    {/* SEO: Meta description-like content in a paragraph */}
                     <p className="text-lg sm:text-xl lg:text-2xl font-light mb-8 opacity-90">
                         Create captivating voiceovers for your videos with our easy-to-use AI voice generator.
                     </p>
-                    <a href="#voice-generator" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
+                    <Link href="/azure" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
                         Start Generating
-                    </a>
+                    </Link>
                 </div>
             </section>
 
             {/* Features Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8">
+            <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="container mx-auto">
+                    {/* SEO: H2 for a major section */}
                     <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Features that Elevate Your Content</h2>
                     <div className="grid md:grid-cols-2 gap-16 lg:gap-24 items-center">
                         {/* Feature 1 */}
                         <div className="order-1 md:order-1">
+                            {/* SEO: H3 for sub-sections */}
                             <h3 className="text-3xl font-bold text-gray-800 mb-4">Emotional Voice Generation</h3>
                             <p className="text-gray-600 mb-6">
                                 Bring your scripts to life with a range of moods including Laughing, Angry, Cheerful, and Sad. Our AI captures the nuance of human emotion, making your content more engaging.
@@ -292,14 +126,14 @@ export default function Home() {
                         </div>
                         <div className="order-2 md:order-2">
                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/emotional.png" alt="Abstract illustration of sound waves morphing into emotions" className="rounded-xl w-full h-full object-cover" />
+                               <img src="/emotional.png" alt="Abstract illustration of sound waves morphing into emotions, representing emotional voice generation." className="rounded-xl w-full h-full object-cover" />
                            </div>
                         </div>
 
                         {/* Feature 2 */}
                         <div className="order-3 md:order-4">
                             <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/texttosound.png" alt="Illustration of easy text input field" className="rounded-xl w-full h-full object-cover" />
+                                <img src="/texttosound.png" alt="Illustration of easy text input field, showing the simplicity of our text-to-speech process." className="rounded-xl w-full h-full object-cover" />
                             </div>
                         </div>
                         <div className="order-4 md:order-3">
@@ -323,36 +157,39 @@ export default function Home() {
                             </a>
                         </div>
                         <div className="order-6 md:order-6">
-                           <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                               <img src="previw.png" alt="Person listening to audio with headphones and download icon" className="rounded-xl w-full h-full object-cover" />
-                           </div>
+                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
+                                <img src="/previw.png" alt="Person listening to audio with headphones and a download icon, illustrating the preview and download feature." className="rounded-xl w-full h-full object-cover" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* How It Works Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+            <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
                 <div className="container mx-auto text-center max-w-5xl">
                     <h2 className="text-4xl font-bold text-gray-800 mb-12">How It Works</h2>
                     <div className="grid md:grid-cols-3 gap-12">
+                        {/* Step 1 */}
                         <div className="flex flex-col items-center">
                             <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/previwand.png" alt="Step 1 icon" className="rounded-xl" />
+                                <img src="/previwand.png" alt="Step 1: Write your script." className="rounded-xl" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Write Your Script</h3>
                             <p className="text-gray-600">Simply type or paste the text you want to convert to speech. No complex setup required.</p>
                         </div>
+                        {/* Step 2 */}
                         <div className="flex flex-col items-center">
                             <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/voicetone.png" alt="Step 2 icon" className="rounded-xl" />
+                                <img src="/voicetone.png" alt="Step 2: Choose your voice and mood." className="rounded-xl" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Choose Your Voice & Mood</h3>
                             <p className="text-gray-600">Select from a variety of voices and apply a mood like Happy, Sad, or Angry to your text.</p>
                         </div>
+                        {/* Step 3 */}
                         <div className="flex flex-col items-center">
                             <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/previwhow.png" alt="Step 3 icon" className="rounded-xl" />
+                                <img src="/previwhow.png" alt="Step 3: Generate and download your audio." className="rounded-xl" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Generate & Download</h3>
                             <p className="text-gray-600">Click generate and download your high-quality audio file instantly. Merge multiple clips if needed.</p>
@@ -361,148 +198,46 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Main TTS Interface Section */}
+            {/* Main TTS Interface Section - Modified for showcase */}
             <section id="voice-generator" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-100">
                 <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
-                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">Customize Your Voice</h2>
-                    <div className="space-y-6">
-                        <textarea
-                            id="textInput"
-                            className="w-full p-4 md:p-6 text-lg rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-200 placeholder-gray-400 resize-none h-40"
-                            placeholder="Type or paste the text you want to convert to speech..."
-                            rows="5"
-                            value={textInput}
-                            onChange={(e) => setTextInput(e.target.value)}
-                        />
-
-                        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                            <select
-                                id="voiceSelect"
-                                className="w-full md:w-1/3 p-3 md:p-4 text-gray-700 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-200"
-                                value={voiceSelect}
-                                onChange={(e) => setVoiceSelect(e.target.value)}
-                            >
-                                <option value="Zephyr">Zephyr (Bright)</option>
-                                <option value="Puck">Puck (Upbeat)</option>
-                                <option value="Charon">Charon (Informative)</option>
-                                <option value="Kore">Kore (Firm)</option>
-                                <option value="Fenrir">Fenrir (Excitable)</option>
-                                <option value="Leda">Leda (Youthful)</option>
-                            </select>
-
-                            <button
-                                id="generateBtn"
-                                className={`w-full md:w-2/3 flex items-center justify-center space-x-2 text-white font-bold py-3 md:py-4 px-6 rounded-xl transition-all duration-200 shadow-lg ${
-                                    isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                                }`}
-                                onClick={handleGenerateAudio}
-                                disabled={isLoading}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.674M12 3v12m0 0l-3.5-3.5M12 15l3.5-3.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>{isLoading ? 'Generating...' : 'Generate Audio'}</span>
-                            </button>
-                        </div>
-
-                        <div className="mt-6">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4">Tone of Voice</h3>
-                            <div className="flex flex-wrap gap-3">
-                                {emotions.map(emotion => (
-                                    <button
-                                        key={emotion.label}
-                                        className={`emotion-btn py-2 px-4 rounded-full text-sm font-semibold transition-colors ${
-                                            currentEmotionPrefix === emotion.prefix
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                        onClick={() => setCurrentEmotionPrefix(emotion.prefix)}
-                                    >
-                                        {emotion.label}
-                                    </button>
-                                ))}
+                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">AI Voice Preview</h2>
+                    <p className="text-gray-600 text-center mb-6">Experience our high-quality AI voice generation with this pre-made audio clip.</p>
+                    
+                    {/* New Audio Player with Wave Animation */}
+                    <div className="flex flex-col items-center space-y-6">
+                        <div className="relative w-full max-w-xl">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                {/* Wave animation - purely decorative, but adds visual interest */}
+                                <div className="absolute w-3/4 h-3/4 animate-pulse-slow">
+                                    <div className="w-full h-full rounded-full bg-indigo-200 opacity-50 absolute animate-wave1"></div>
+                                    <div className="w-full h-full rounded-full bg-purple-200 opacity-50 absolute animate-wave2"></div>
+                                    <div className="w-full h-full rounded-full bg-indigo-300 opacity-50 absolute animate-wave3"></div>
+                                </div>
+                            </div>
+                            <div className="relative z-10 p-4 bg-gray-50 rounded-xl shadow-inner">
+                                <audio controls className="w-full">
+                                    <source src={audioClips[0].url} type="audio/mpeg" />
+                                    Your browser does not support the audio element.
+                                </audio>
                             </div>
                         </div>
-                    </div>
-
-                    {isLoading && (
-                        <div className="flex justify-center items-center mt-8">
-                            <div className="spinner"></div>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* Audio Manager Section */}
-            <section id="audio-manager" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-                <div className="container mx-auto max-w-4xl space-y-4">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-12 text-center">Preview and Download</h2>
-                    <div id="audioList" className="space-y-4">
-                        {audioQueue.length === 0 ? (
-                            <p className="text-gray-500 text-center">No audio clips generated yet.</p>
-                        ) : (
-                            audioQueue.map(audio => (
-                                <div key={audio.id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-50 rounded-xl shadow-md space-y-3 md:space-y-0" data-id={audio.id}>
-                                    <div className="flex-1 w-full flex items-center space-x-4">
-                                        <input
-                                            type="checkbox"
-                                            className="merge-checkbox form-checkbox h-5 w-5 text-blue-600 rounded-md"
-                                            checked={selectedAudios.includes(audio.id)}
-                                            onChange={() => handleCheckboxChange(audio.id)}
-                                        />
-                                        <span className="text-sm md:text-base font-medium text-gray-800 truncate">{audio.text}</span>
-                                    </div>
-                                    <div className="w-full md:w-auto flex items-center justify-end space-x-2">
-                                        <audio controls className="w-full md:w-auto min-w-0 md:min-w-[150px] rounded-lg">
-                                            <source src={audio.url} type="audio/wav" />
-                                        </audio>
-                                        <button
-                                            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors duration-200"
-                                            title="Download"
-                                            onClick={() => handleDownloadBlob(audio.blob, `voice-clip-${audio.id}.wav`)}
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                        </button>
-                                        <button
-                                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors duration-200"
-                                            title="Delete"
-                                            onClick={() => handleDeleteAudio(audio.id)}
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <div className="flex flex-col md:flex-row justify-end space-y-4 md:space-y-0 md:space-x-4 mt-6">
-                        <button
-                            id="mergeBtn"
-                            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            onClick={handleMergeSelected}
-                            disabled={selectedAudios.length < 2}
-                        >
-                            <span className="flex items-center justify-center space-x-2">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-8a1 1 0 102 0 1 1 0 00-2 0zm-3-1a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zm-5 4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
-                                </svg>
-                                <span>Merge Selected</span>
-                            </span>
-                        </button>
-                        <button
-                            id="downloadMergedBtn"
-                            className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            onClick={() => handleDownloadBlob(mergedAudioBlob, 'merged-voice-clip.wav')}
-                            disabled={!mergedAudioBlob}
+                        {/* Display the Hindi dialogue as the text caption */}
+                        <p className="text-center font-medium text-gray-700">{audioClips[0].text}</p>
+                        {/* <button
+                            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            onClick={() => handleDownload(audioClips[0].url, 'ai-voice-preview.mp3')}
                         >
                             <span className="flex items-center justify-center space-x-2">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>Download Merged Audio</span>
+                                <span>Download this Preview</span>
                             </span>
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </section>
+
+            {/* Audio Manager Section - Removed since it's not needed */}
 
             {/* Testimonials Section */}
             <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -511,7 +246,7 @@ export default function Home() {
                     <div className="grid md:grid-cols-3 gap-8">
                         {/* Testimonial 1 */}
                         <div className="bg-white p-6 rounded-3xl shadow-lg">
-                            <p className="text-gray-600 mb-4 italic">"TTS Sound has transformed my YouTube channel. The emotional voices make my characters feel so real! It's a game-changer for my animation videos."</p>
+                            <p className="text-gray-600 mb-4 italic">"Hearo has transformed my YouTube channel. The emotional voices make my characters feel so real! It's a game-changer for my animation videos."</p>
                             <div className="font-semibold text-gray-800">- Jane D.</div>
                         </div>
                         {/* Testimonial 2 */}
@@ -529,30 +264,41 @@ export default function Home() {
             </section>
 
             {/* Final CTA Section */}
-            <section className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white py-20 px-4 sm:px-6 lg:px-8 text-center rounded-t-[40px] shadow-xl">
+            <section id="contact" className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white py-20 px-4 sm:px-6 lg:px-8 text-center rounded-t-[40px] shadow-xl">
                 <div className="container mx-auto max-w-4xl">
                     <h2 className="text-4xl font-bold mb-4">Ready to Elevate Your Content?</h2>
-                    <p className="text-lg mb-8 opacity-90">Join thousands of content creators who use TTS Sound to produce captivating voiceovers.</p>
+                    <p className="text-lg mb-8 opacity-90">Join thousands of content creators who use Hearo to produce captivating voiceovers.</p>
                     <a href="#voice-generator" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
                         Get Started for Free
                     </a>
                 </div>
             </section>
 
-            <style>{`
-                .spinner {
-                    width: 40px;
-                    height: 40px;
-                    border: 4px solid rgba(255, 255, 255, 0.3);
-                    border-radius: 50%;
-                    border-top-color: #ffffff;
-                    animation: spin 1s ease-in-out infinite;
+            {/* New CSS for wave animations */}
+            <style jsx>{`
+                @keyframes wave1 {
+                    0% { transform: scale(0.6); opacity: 0.5; }
+                    50% { transform: scale(1); opacity: 0; }
+                    100% { transform: scale(0.6); opacity: 0.5; }
                 }
-
-                @keyframes spin {
-                    to {
-                        transform: rotate(360deg);
-                    }
+                @keyframes wave2 {
+                    0% { transform: scale(0.3); opacity: 0; }
+                    50% { transform: scale(0.8); opacity: 0.5; }
+                    100% { transform: scale(0.3); opacity: 0; }
+                }
+                @keyframes wave3 {
+                    0% { transform: scale(0); opacity: 0.2; }
+                    50% { transform: scale(0.6); opacity: 0.6; }
+                    100% { transform: scale(0); opacity: 0.2; }
+                }
+                .animate-wave1 {
+                    animation: wave1 3s infinite ease-in-out;
+                }
+                .animate-wave2 {
+                    animation: wave2 3s infinite 0.5s ease-in-out;
+                }
+                .animate-wave3 {
+                    animation: wave3 3s infinite 1s ease-in-out;
                 }
             `}</style>
         </main>
