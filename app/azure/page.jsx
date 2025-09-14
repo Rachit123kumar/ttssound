@@ -1,229 +1,314 @@
-"use client"
-import React, { useState } from "react";
-import axios from "axios";
+"use client";
+import { useState, useEffect } from "react";
+import axios from "axios"; // Import axios
+import {
+  Home,
+  Mic,
+  Settings,
+  Headphones,
+  Music,
+  Zap,
+  Menu,
+  X,
+  Download,
+} from "lucide-react";
 
-// Replaced react-icons with inline SVG components to resolve compilation error
-const FaHome = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 576 512" height="1em" width="1em" {...props}>
-    <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H400c-22.1 0-40-17.9-40-40v-88c0-17.7-14.3-32-32-32h-64c-17.7 0-32 14.3-32 32v88c0 22.1-17.9 40-40 40H168c-22.1 0-40-17.9-40-40v-83.3c-.3-2.7-.5-5.4-.5-8.1l.7-160.2h-32c-17 0-32-14.1-32-32.1 0-9 4.3-17.1 11.4-22.8L265.4 9.4c16.3-12.9 45.4-12.9 61.7 0L564.4 232.7c7.1 5.6 11.4 13.8 11.4 22.8z"></path>
-  </svg>
-);
-const FaMicrophone = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" {...props}>
-    <path d="M192 0C134.3 0 88 46.3 88 104v48H48c-26.5 0-48 21.5-48 48v24c0 26.5 21.5 48 48 48h24c0 14.7 3.3 28.5 9.3 41.2-8.1 4.5-16 10.3-22.7 17.5-12.9 13.5-12.9 35.3 0 48.8 12.9 13.5 33.7 13.5 46.6 0 11.8-12.3 20-27.7 24.3-44.2 12.2 2.7 24.9 4.2 38.2 4.2 13.3 0 26.1-1.5 38.2-4.2 4.3 16.5 12.5 31.9 24.3 44.2 12.9 13.5 33.7 13.5 46.6 0 12.9-13.5 12.9-35.3 0-48.8-6.7-7.2-14.6-13-22.7-17.5 6-12.7 9.3-26.5 9.3-41.2h24c26.5 0 48-21.5 48-48v-24c0-26.5-21.5-48-48-48h-40v-48c0-57.7-46.3-104-104-104zM240 104v48h-96v-48c0-26.5 21.5-48 48-48s48 21.5 48 48z"></path>
-  </svg>
-);
-const FaPlayCircle = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" {...props}>
-    <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 150v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24zm128 0v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24z"></path>
-  </svg>
-);
-const FaVolumeUp = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" {...props}>
-    <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 150v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24z"></path>
-  </svg>
-);
-const FaBolt = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" {...props}>
-    <path d="M192 0C134.3 0 88 46.3 88 104v48H48c-26.5 0-48 21.5-48 48v24c0 26.5 21.5 48 48 48h24c0 14.7 3.3 28.5 9.3 41.2-8.1 4.5-16 10.3-22.7 17.5-12.9 13.5-12.9 35.3 0 48.8 12.9 13.5 33.7 13.5 46.6 0 11.8-12.3 20-27.7 24.3-44.2 12.2 2.7 24.9 4.2 38.2 4.2 13.3 0 26.1-1.5 38.2-4.2 4.3 16.5 12.5 31.9 24.3 44.2 12.9 13.5 33.7 13.5 46.6 0 12.9-13.5 12.9-35.3 0-48.8-6.7-7.2-14.6-13-22.7-17.5 6-12.7 9.3-26.5 9.3-41.2h24c26.5 0 48-21.5 48-48v-24c0-26.5-21.5-48-48-48h-40v-48c0-57.7-46.3-104-104-104zM240 104v48h-96v-48c0-26.5 21.5-48 48-48s48 21.5 48 48z"></path>
-  </svg>
-);
-const FaMagic = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" {...props}>
-    <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 150v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24z"></path>
-  </svg>
-);
-const FaFileAudio = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 384 512" height="1em" width="1em" {...props}>
-    <path d="M192 0C134.3 0 88 46.3 88 104v48H48c-26.5 0-48 21.5-48 48v24c0 26.5 21.5 48 48 48h24c0 14.7 3.3 28.5 9.3 41.2-8.1 4.5-16 10.3-22.7 17.5-12.9 13.5-12.9 35.3 0 48.8 12.9 13.5 33.7 13.5 46.6 0 11.8-12.3 20-27.7 24.3-44.2 12.2 2.7 24.9 4.2 38.2 4.2 13.3 0 26.1-1.5 38.2-4.2 4.3 16.5 12.5 31.9 24.3 44.2 12.9 13.5 33.7 13.5 46.6 0 12.9-13.5 12.9-35.3 0-48.8-6.7-7.2-14.6-13-22.7-17.5 6-12.7 9.3-26.5 9.3-41.2h24c26.5 0 48-21.5 48-48v-24c0-26.5-21.5-48-48-48h-40v-48c0-57.7-46.3-104-104-104zM240 104v48h-96v-48c0-26.5 21.5-48 48-48s48 21.5 48 48z"></path>
-  </svg>
-);
-const FaCommentDots = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" {...props}>
-    <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 150v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24z"></path>
-  </svg>
-);
-const FaCode = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" {...props}>
-    <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 150v196c0 13.3 10.7 24 24 24h64c13.3 0 24-10.7 24-24V158c0-13.3-10.7-24-24-24h-64c-13.3 0-24 10.7-24 24z"></path>
-  </svg>
-);
-const FaBell = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" {...props}>
-    <path d="M224 512c35.32 0 63.97-28.65 63.97-64H160.03c0 35.35 28.66 64 63.97 64zm215.39-149.31c-19.16-16.14-38.35-32.22-48.4-44.11-20.91-24.32-31.53-56.16-31.53-91.89C359.46 95.14 286.99 15.11 224 15.11s-135.46 80.03-135.46 211.69c0 35.73-10.62 67.57-31.53 91.89-10.05 11.89-29.24 27.97-48.4 44.11C15.89 397.66 0 408.83 0 424h448c0-15.17-15.89-26.34-24.61-38.62z"></path>
-  </svg>
-);
-const FaUserCircle = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 496 512" height="1em" width="1em" {...props}>
-    <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 112c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0 304c-60.5 0-113.8-31.4-144-79.6 20.6-28.4 61.6-48.4 116.5-54.6 22.1-2.5 44.1-3.8 67.5-3.8s45.4 1.3 67.5 3.8c54.9 6.2 95.9 26.2 116.5 54.6-30.2 48.2-83.5 79.6-144 79.6z"></path>
-  </svg>
-);
+export default function Dashboard() {
+  const [languages] = useState([
+    { code: "en-US", name: "English (United Kingdom)" },
+    { code: "hi-IN", name: "Hindi (India)" },
+  ]);
 
+  const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [creditsRemaining] = useState(9724);
+  const [characterCount, setCharacterCount] = useState(0);
+  const [isNavCollapsed, setIsNavCollapsed] = useState(true);
 
-const Sidebar = () => {
-  const navItems = [
-    { name: 'Dashboard', icon: FaHome, active: false },
-    { name: 'Text to Speech', icon: FaMicrophone, active: true },
-    { name: 'Voices', icon: FaVolumeUp, active: false },
-    { name: 'Projects', icon: FaFileAudio, active: false },
+  // New states for speech generation
+  const [loading, setLoading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [message, setMessage] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  /** Static voices for Hindi and English */
+  const hindiVoices = [
+    { key: "hi-IN-AaravNeural", displayName: "Aarav", description: "Male, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=A" },
+    { key: "hi-IN-AartiNeural", displayName: "Aarti", description: "Female, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=AA" },
+    { key: "hi-IN-KavyaNeural", displayName: "Kavya", description: "Female, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=K" },
+    { key: "hi-IN-RehaanNeural", displayName: "Rehaan", description: "Male, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=R" },
+    { key: "hi-IN-SwaraNeural", displayName: "Swara", description: "Female, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=S" },
+    { key: "hi-IN-MadhurNeural", displayName: "Madhur", description: "Male, Adult (Hindi)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=M" },
   ];
 
-  return (
-    <aside className="hidden md:flex w-64 bg-gray-950 text-gray-300 p-6 flex-col overflow-y-auto">
-      <div className="flex items-center space-x-2 text-teal-400 text-3xl font-bold mb-10">
-        <FaBolt className="text-teal-400" />
-        <span>HEaro</span>
-      </div>
-      <nav className="flex-grow space-y-6">
-        <div>
-          <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Features</span>
-          <ul className="space-y-2 mt-3">
-            {navItems.map((item) => (
-              <li
-                key={item.name}
-                className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${item.active ? 'bg-gray-800 text-teal-400 font-medium' : 'hover:bg-gray-800 hover:text-white'}`}
-              >
-                <item.icon className="text-lg" />
-                <span>{item.name}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
-      <div className="mt-auto pt-6 border-t border-gray-800">
-        <div className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer hover:bg-gray-800 hover:text-white transition-colors duration-200">
-          <FaUserCircle className="text-4xl text-gray-500" />
-          <div className="flex flex-col">
-            <span className="text-sm text-white">Guest User</span>
-            <span className="text-xs text-gray-500">My Account</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-};
+  const englishVoices = [
+    { key: "en-US-JennyNeural", displayName: "Jenny", description: "Female, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=J" },
+    { key: "en-US-GuyNeural", displayName: "Guy", description: "Male, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=G" },
+    { key: "en-US-AriaNeural", displayName: "Aria", description: "Female, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=A" },
+    { key: "en-US-EmmaMultilingualNeural", displayName: "Emma", description: "Female, Adult (English US, Multilingual)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=E" },
+    { key: "en-US-AndrewNeural", displayName: "Andrew", description: "Male, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=AN" },
+    { key: "en-US-SaraNeural", displayName: "Sara", description: "Female, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=S" },
+    { key: "en-US-NancyNeural", displayName: "Nancy", description: "Female, Adult (English US)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=N" },
+    { key: "en-GB-SoniaNeural", displayName: "Sonia", description: "Female, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=S" },
+    { key: "en-GB-RyanNeural", displayName: "Ryan", description: "Male, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=R" },
+    { key: "en-GB-LibbyNeural", displayName: "Libby", description: "Female, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=L" },
+    { key: "en-GB-AbbiNeural", displayName: "Abbi", description: "Female, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=AB" },
+    { key: "en-GB-AlfieNeural", displayName: "Alfie", description: "Male, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=AL" },
+    { key: "en-GB-BellaNeural", displayName: "Bella", description: "Female, Adult (English UK)", picture: "https://placehold.co/40x40/E2E8F0/A0AEC0?text=B" },
+  ];
 
-const MainContent = () => {
-  const [text, setText] = useState("");
-  const [language, setLanguage] = useState("en-US");
-  const [voice, setVoice] = useState("en-US-AriaNeural");
-  const [audioUrl, setAudioUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'error' or 'success'
 
-  const generateSpeech = async () => {
-    setLoading(true);
+  /** Update voices when language changes */
+  useEffect(() => {
+    if (selectedLanguage === "hi-IN") {
+      setVoices(hindiVoices);
+      setSelectedVoice(hindiVoices[0].key);
+    } else {
+      setVoices(englishVoices);
+      setSelectedVoice(englishVoices[0].key);
+    }
+  }, [selectedLanguage]);
+
+  useEffect(() => {
+    setCharacterCount(inputText.length);
+  }, [inputText]);
+
+  const toggleNav = () => {
+    setIsNavCollapsed(!isNavCollapsed);
+  };
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
     setAudioUrl("");
     setMessage("");
 
     try {
       const { data } = await axios.post("/api/azure", {
-        text,
-        language,
-        voice,
+        text: inputText,
+        language: selectedLanguage,
+        voice: selectedVoice,
       });
 
       setAudioUrl(data.url);
       setMessage("Audio generated successfully!");
-      setMessageType("success");
     } catch (error) {
       console.error("Error generating speech", error);
       setMessage("Failed to generate speech. Please try again.");
-      setMessageType("error");
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
   };
 
   return (
-    <main className="flex-grow p-8 flex flex-col items-center justify-center bg-gray-900 overflow-y-auto">
-      <div className="w-full max-w-2xl bg-gray-800 rounded-3xl shadow-xl p-8 space-y-8">
-        <h1 className="text-3xl font-bold text-gray-100 text-center">AI Voice Generator</h1>
-
-        {message && (
-          <div className={`p-4 rounded-lg text-sm text-center ${messageType === 'error' ? 'bg-red-500 text-white' : 'bg-teal-500 text-white'}`}>
-            {message}
+    <div className="min-h-screen bg-pink-50 font-sans flex text-gray-800">
+      {/* Sidebar - Desktop and Tablet */}
+      <aside
+        className={`bg-white border-r border-gray-200 p-4 hidden md:flex flex-col transition-all duration-300 ${isNavCollapsed ? "w-20" : "w-64"
+          }`}
+      >
+        <div>
+          <div className="flex items-center space-x-2 text-xl font-bold mb-6 text-pink-600">
+            <Zap className="h-6 w-6 text-pink-600" />
+            <span className={isNavCollapsed ? "hidden" : "block"}>HEaro</span>
           </div>
+          <nav className="space-y-2">
+            {[
+              { icon: <Home className="h-5 w-5" />, label: "Home" },
+              { icon: <Mic className="h-5 w-5" />, label: "Voices" },
+              { icon: <Headphones className="h-5 w-5" />, label: "Text to Speech", active: true },
+              { icon: <Settings className="h-5 w-5" />, label: "Voice Changer" },
+              { icon: <Music className="h-5 w-5" />, label: "Sound Effects" },
+            ].map(({ icon, label, active }) => (
+              <button
+                key={label}
+                className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${active
+                  ? "bg-pink-50 text-pink-600 font-semibold"
+                  : "hover:bg-gray-100 text-gray-700"
+                  }`}
+              >
+                {icon}
+                <span className={isNavCollapsed ? "hidden" : "block"}>{label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Mobile Header */}
+        <header className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
+          <div className="flex items-center space-x-2 text-xl font-bold text-pink-600">
+            <Zap className="h-6 w-6" />
+            <span>HEaro</span>
+          </div>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={toggleNav}
+          >
+            {isNavCollapsed ? <Menu className="h-6 w-6 text-gray-600" /> : <X className="h-6 w-6 text-gray-600" />}
+          </button>
+        </header>
+
+        {/* Mobile Nav Menu (Visible when isNavCollapsed is false on small screens) */}
+        {!isNavCollapsed && (
+          <nav className="fixed inset-0 z-50 bg-white md:hidden p-4 space-y-4">
+            <div className="flex items-center justify-between text-xl font-bold text-pink-600 mb-6">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-6 w-6" />
+                <span>HEaro</span>
+              </div>
+              <button className="p-2 rounded-md hover:bg-gray-100" onClick={toggleNav}>
+                <X className="h-6 w-6 text-gray-600" />
+              </button>
+            </div>
+            {[
+              { icon: <Home className="h-6 w-6" />, label: "Home" },
+              { icon: <Mic className="h-6 w-6" />, label: "Voices" },
+              { icon: <Headphones className="h-6 w-6" />, label: "Text to Speech", active: true },
+              { icon: <Settings className="h-6 w-6" />, label: "Voice Changer" },
+              { icon: <Music className="h-6 w-6" />, label: "Sound Effects" },
+            ].map(({ icon, label, active }) => (
+              <button
+                key={label}
+                className={`flex items-center space-x-4 w-full text-left px-4 py-3 rounded-lg text-lg transition-colors ${active
+                  ? "bg-pink-50 text-pink-600 font-semibold"
+                  : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                onClick={toggleNav}
+              >
+                {icon}
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
         )}
 
-        <textarea
-          className="w-full h-48 border-2 border-gray-700 rounded-2xl p-4 text-lg bg-gray-900 text-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none placeholder-gray-400"
-          placeholder="Type your text here..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          {/* Text Input Area */}
+          <div className="flex-1 p-4 md:p-8 overflow-y-auto">
+            <h1 className="text-3xl font-bold mb-6 hidden md:block">Text to Speech</h1>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 h-[70vh] flex flex-col">
+              <textarea
+                placeholder="Type something here..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className="flex-1 w-full text-lg p-2 border-none resize-none outline-none focus:ring-0"
+              />
+              <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t mt-4">
+                {/* <span>{creditsRemaining} credits remaining</span> */}
+                <span>{characterCount} / 5,000 characters</span>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-400 mb-2">Language</label>
-            <select
-              className="w-full p-4 border-2 border-gray-700 rounded-2xl bg-gray-900 text-gray-200 focus:ring-2 focus:ring-teal-400 appearance-none pr-10"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              <option value="en-US">English (US)</option>
-              <option value="hi-IN">Hindi</option>
-              <option value="fr-FR">French</option>
-            </select>
+            {/* Audio Player and Download button */}
+            {audioUrl && (
+              <div className="mt-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm flex items-center justify-between">
+                <audio controls src={audioUrl} className="flex-1 mr-4"></audio>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(audioUrl);
+                      const blob = await res.blob();
+                      const url = window.URL.createObjectURL(blob);
+
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = "generated-speech.mp3";
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+
+                      // Free memory
+                      window.URL.revokeObjectURL(url);
+                    } catch (err) {
+                      console.error("Download failed", err);
+                    }
+                  }}
+                  className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition"
+                >
+                  Download
+                </button>
+
+
+              </div>
+            )}
+            {/* Generation Status Message */}
+            {message && (
+              <div className={`mt-4 p-3 rounded-md text-sm ${message.includes("success") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                {message}
+              </div>
+            )}
           </div>
 
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-400 mb-2">Voice</label>
-            <select
-              className="w-full p-4 border-2 border-gray-700 rounded-2xl bg-gray-900 text-gray-200 focus:ring-2 focus:ring-teal-400 appearance-none pr-10"
-              value={voice}
-              onChange={(e) => setVoice(e.target.value)}
-            >
-              <option value="en-US-AriaNeural">Aria (Female)</option>
-              <option value="en-US-GuyNeural">Guy (Male)</option>
-              <option value="hi-IN-AaravNeural">Aarav (Male, India)</option>
-              <option value="hi-IN-AartiNeural">Aarti (Female Adult, India)</option>
-              <option value="hi-IN-ArjunNeural">Arjun (Male, India)</option>
-              <option value="hi-IN-KavyaNeural">Kavya (Female Adult, India)</option>
-              <option value="hi-IN-KunalNeural">Kunal (Male Adult, India)</option>
-              <option value="hi-IN-RehanNeural">Rehan (Male Adult, India)</option>
-              <option value="hi-IN-SwaraNeural">Swara (Female, India)</option>
-              <option value="hi-IN-MadhuNeural">Madhu (Female, India)</option>
-            </select>
+          {/* Settings Panel */}
+          <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-gray-200 bg-white p-6 md:p-8 flex flex-col overflow-y-auto">
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold mb-4">Settings</h2>
+
+              {/* Language Selector */}
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">Language</label>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pink-500"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Voices List */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Voice</label>
+                {voices.length > 0 ? (
+                  <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                    {voices.map((voice) => (
+                      <div
+                        key={voice.key}
+                        onClick={() => setSelectedVoice(voice.key)}
+                        className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition ${selectedVoice === voice.key
+                          ? "bg-pink-50 border border-pink-500"
+                          : "hover:bg-gray-100 border border-transparent"
+                          }`}
+                      >
+                        <img
+                          src={voice.picture}
+                          alt={voice.displayName}
+                          className="h-10 w-10 rounded-full"
+                        />
+                        <div>
+                          <div className="font-medium">{voice.displayName}</div>
+                          <div className="text-sm text-gray-500">{voice.description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No voices available</p>
+                )}
+              </div>
+            </div>
+
+            {/* Generate Button */}
+            <div className="mt-6">
+              <button
+                className="w-full bg-pink-600 text-white py-3 rounded-xl font-semibold hover:bg-pink-700 transition"
+                onClick={handleGenerate}
+                disabled={isGenerating || !inputText || !selectedVoice}
+              >
+                {isGenerating ? "Generating..." : "Generate Speech"}
+              </button>
+            </div>
           </div>
         </div>
-
-        <button
-          onClick={generateSpeech}
-          disabled={loading}
-          className="w-full bg-teal-600 text-white font-semibold py-4 rounded-full shadow-lg hover:bg-teal-700 transition transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed"
-        >
-          {loading ? "Generating..." : "Generate Audio"}
-        </button>
-
-        {audioUrl && (
-          <div className="space-y-4">
-            <audio controls className="w-full rounded-full">
-              <source src={audioUrl} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-            <a
-              href={audioUrl}
-              download="speech.mp3"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-center w-full bg-blue-600 text-white font-semibold py-4 rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105"
-            >
-              Download Audio
-            </a>
-          </div>
-        )}
       </div>
-    </main>
-  );
-};
-
-export default function App() {
-  return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-900 text-gray-200 font-sans">
-      <Sidebar />
-      <MainContent />
     </div>
   );
 }
