@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import Link from 'next/link'; // Import the Link component
+import Link from 'next/link';
 
 // Custom message box function (kept for user feedback on other actions)
 const showMessage = (message, type = 'info') => {
@@ -84,6 +84,8 @@ export default function Home() {
                     </div>
 
                     <div id="main-menu" className={`md:flex items-center space-x-8 mt-4 md:mt-0 ${isMenuOpen ? 'block' : 'hidden'}`}>
+                        {/* New link for the multi-speaker feature */}
+                        <Link href="/multispeaker" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Multi-Speaker</Link>
                         <Link href="/azure" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Generate</Link>
                         <a href="#features" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Features</a>
                         <a href="#how-it-works" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">How It Works</a>
@@ -101,9 +103,15 @@ export default function Home() {
                     <p className="text-lg sm:text-xl lg:text-2xl font-light mb-8 opacity-90">
                         Create captivating voiceovers for your videos with our easy-to-use AI voice generator.
                     </p>
-                    <Link href="/azure" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
-                        Start Generating
-                    </Link>
+                    <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <Link href="/azure" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
+                            Start Generating
+                        </Link>
+                        {/* New CTA button for multi-speaker */}
+                        <Link href="/multispeaker" className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-white hover:text-indigo-700 transition duration-300 transform hover:scale-105">
+                            Multi-Speaker TTS
+                        </Link>
+                    </div>
                 </div>
             </section>
 
@@ -120,7 +128,7 @@ export default function Home() {
                             <p className="text-gray-600 mb-6">
                                 Bring your scripts to life with a range of moods including Laughing, Angry, Cheerful, and Sad. Our AI captures the nuance of human emotion, making your content more engaging.
                             </p>
-                            <a href="#voice-generator" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
+                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
                                 Try Emotional Voices &rarr;
                             </a>
                         </div>
@@ -130,33 +138,49 @@ export default function Home() {
                            </div>
                         </div>
 
-                        {/* Feature 2 */}
+                        {/* New Feature Block for Multi-Speaker */}
                         <div className="order-3 md:order-4">
                             <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/texttosound.png" alt="Illustration of easy text input field, showing the simplicity of our text-to-speech process." className="rounded-xl w-full h-full object-cover" />
+                                <img src="/multispeaker.png" alt="Illustration of two people talking, representing multi-speaker dialogue." className="rounded-xl w-full h-full object-cover" />
                             </div>
                         </div>
                         <div className="order-4 md:order-3">
+                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Multi-Speaker Dialogue</h3>
+                            <p className="text-gray-600 mb-6">
+                                Create realistic conversations for your videos, podcasts, and audiobooks. Our new two-speaker feature allows you to generate dynamic dialogue between distinct voices.
+                            </p>
+                            <Link href="/multispeaker" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
+                                Try Dialogue Generation &rarr;
+                            </Link>
+                        </div>
+
+                        {/* Feature 2 (Original) */}
+                        <div className="order-5 md:order-5">
                             <h3 className="text-3xl font-bold text-gray-800 mb-4">Easy Text Input</h3>
                             <p className="text-gray-600 mb-6">
                                 Simply paste your script into our intuitive editor. We make text-to-speech effortless, so you can focus on creating.
                             </p>
-                            <a href="#voice-generator" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
+                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
                                 See How Simple It Is &rarr;
                             </a>
                         </div>
+                        <div className="order-6 md:order-6">
+                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
+                                <img src="/texttosound.png" alt="Illustration of easy text input field, showing the simplicity of our text-to-speech process." className="rounded-xl w-full h-full object-cover" />
+                            </div>
+                        </div>
 
-                        {/* Feature 3 */}
-                        <div className="order-5 md:order-5">
+                        {/* Feature 3 (Original) */}
+                        <div className="order-7 md:order-7">
                             <h3 className="text-3xl font-bold text-gray-800 mb-4">Preview and Download</h3>
                             <p className="text-gray-600 mb-6">
                                 Listen to your generated audio instantly. Download your clips as a single, high-quality WAV file, ready for your video projects.
                             </p>
-                            <a href="#audio-manager" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
+                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
                                 Check Downloads Manager &rarr;
                             </a>
                         </div>
-                        <div className="order-6 md:order-6">
+                        <div className="order-8 md:order-8">
                             <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
                                 <img src="/previw.png" alt="Person listening to audio with headphones and a download icon, illustrating the preview and download feature." className="rounded-xl w-full h-full object-cover" />
                             </div>
@@ -176,7 +200,7 @@ export default function Home() {
                                 <img src="/previwand.png" alt="Step 1: Write your script." className="rounded-xl" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Write Your Script</h3>
-                            <p className="text-gray-600">Simply type or paste the text you want to convert to speech. No complex setup required.</p>
+                            <p className="text-gray-600">Simply type or paste the text or dialogue you want to convert to speech. No complex setup required.</p>
                         </div>
                         {/* Step 2 */}
                         <div className="flex flex-col items-center">
@@ -184,7 +208,7 @@ export default function Home() {
                                 <img src="/voicetone.png" alt="Step 2: Choose your voice and mood." className="rounded-xl" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Choose Your Voice & Mood</h3>
-                            <p className="text-gray-600">Select from a variety of voices and apply a mood like Happy, Sad, or Angry to your text.</p>
+                            <p className="text-gray-600">Select from a variety of voices and apply a mood like Happy, Sad, or Angry to your text. Choose two for dialogue!</p>
                         </div>
                         {/* Step 3 */}
                         <div className="flex flex-col items-center">
@@ -203,7 +227,7 @@ export default function Home() {
                 <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
                     <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">AI Voice Preview</h2>
                     <p className="text-gray-600 text-center mb-6">Experience our high-quality AI voice generation with this pre-made audio clip.</p>
-                    
+
                     {/* New Audio Player with Wave Animation */}
                     <div className="flex flex-col items-center space-y-6">
                         <div className="relative w-full max-w-xl">
@@ -224,15 +248,6 @@ export default function Home() {
                         </div>
                         {/* Display the Hindi dialogue as the text caption */}
                         <p className="text-center font-medium text-gray-700">{audioClips[0].text}</p>
-                        {/* <button
-                            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            onClick={() => handleDownload(audioClips[0].url, 'ai-voice-preview.mp3')}
-                        >
-                            <span className="flex items-center justify-center space-x-2">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>Download this Preview</span>
-                            </span>
-                        </button> */}
                     </div>
                 </div>
             </section>
