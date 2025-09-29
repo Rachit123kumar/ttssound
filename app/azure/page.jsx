@@ -205,35 +205,41 @@ export default function Dashboard() {
 
             {/* Audio Player and Download button */}
             {audioUrl && (
-              <div className="mt-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm flex items-center justify-between">
-                <audio controls src={audioUrl} className="flex-1 mr-4"></audio>
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(audioUrl);
-                      const blob = await res.blob();
-                      const url = window.URL.createObjectURL(blob);
+              <div className="mt-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  {/* Audio Player */}
+  <audio
+    controls
+    src={audioUrl}
+    className="w-full md:flex-1 md:mr-4"
+  ></audio>
 
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = "generated-speech.mp3";
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
+  {/* Download Button */}
+  <button
+    onClick={async () => {
+      try {
+        const res = await fetch(audioUrl);
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
 
-                      // Free memory
-                      window.URL.revokeObjectURL(url);
-                    } catch (err) {
-                      console.error("Download failed", err);
-                    }
-                  }}
-                  className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition"
-                >
-                  Download
-                </button>
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "generated-speech.mp3";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
+        // Free memory
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Download failed", err);
+      }
+    }}
+    className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition w-full md:w-auto"
+  >
+    Download
+  </button>
+</div>
 
-              </div>
             )}
             {/* Generation Status Message */}
             {message && (
