@@ -34,9 +34,27 @@ export default function Home() {
         {
             id: 'clip-1',
             // The Hindi dialogue provided by the user
-            text: 'एक पुरानी तस्वीर मेरे हाथ में थी। धुंधली, किनारों से फटी हुई, पर उसमें कैद वो पल आज भी मेरे ज़हन में ताज़ा था। वो बारिश की शाम थी, जब मैं और मेरी माँ गाँव के उस कच्चे रास्ते पर चले जा रहे थे। मेरे नंगे पाँव मिट्टी में धँस रहे थे और माँ का आँचल मेरे सिर पर था। हवा बहुत तेज़ थी, पेड़ों की पत्तियाँ नाच रही थीं और आसमान में बिजलियाँ चमक रही थीं। माँ ने मेरा हाथ कसकर पकड़ रखा था।',
+            text: `यहाँ एक छोटी प्रेरक कहानी है जिसे आप रील्स के लिए इस्तेमाल कर सकते हैं:
+
+मंज़िल की तलाश
+एक छोटे से गाँव में रमेश नाम का एक लड़का रहता था। उसका सपना था कि वह एक दिन एक बड़ा पर्वतारोही बनेगा।
+
+गाँव के लोग उस पर हँसते थे। "तुम? पर्वतारोही? यह तुम्हारे बस की बात नहीं," वे कहते थे। रमेश के पास महँगे उपकरण नहीं थे, और न ही कोई प्रशिक्षण। उसके पास थी तो बस अपनी टूटी-फूटी साइकिल और एक ज़बरदस्त इच्छाशक्ति।
+
+एक दिन, उसने अपनी यात्रा शुरू करने का फैसला किया। उसके सामने था एक विशाल, पथरीला पहाड़। पहली कोशिश में वह फिसल गया, उसके घुटनों में चोट लगी, और वह बुरी तरह थक गया। निराशा ने उसे घेर लिया।
+
+वह वहीं बैठ गया। तभी उसकी नज़र एक छोटी-सी चींटी पर पड़ी जो अपने से कई गुना भारी दाना लेकर पहाड़ पर चढ़ने की कोशिश कर रही थी। बार-बार वह फिसलती, गिरती, पर हर बार वह उठकर फिर से प्रयास करती।
+
+रमेश ने उस चींटी को देखा और उसे एक प्रेरणा मिली। उसने सोचा, "अगर यह नन्ही-सी जान हार नहीं मान रही, तो मैं क्यों मानूँ?"
+
+उसने अपनी चोटों को अनदेखा किया, अपनी साइकिल को एक तरफ़ रखा, और फिर से चढ़ना शुरू कर दिया। इस बार उसने छोटे-छोटे कदम लिए, पूरी एकाग्रता के साथ। जब भी वह थकने लगता, उसे उस चींटी की लगातार कोशिश याद आती।
+
+कई दिनों और रातों की मेहनत के बाद, रमेश आखिरकार चोटी पर पहुँच गया। जब उसने नीचे देखा, तो पूरा गाँव एक छोटे से डिब्बे जैसा लग रहा था।
+
+सीख
+ज़िंदगी में सफलता का रास्ता कभी आसान नहीं होता। जब दुनिया कहे 'तुम नहीं कर सकते', तो चींटी की तरह बनो। अपनी मंज़िल पर आँखें रखो, और तब तक कोशिश करो जब तक तुम चोटी पर न पहुँच जाओ। आपकी सबसे बड़ी शक्ति आपकी 'इच्छाशक्ति' है।`,
             // The new audio URL
-            url: 'https://pub-105fec70566540d1a4cf3698e960bfa4.r2.dev/speech/01dd11b1-c61d-4bff-9dd1-44f631015430.mp3',
+            url: 'https://pub-105fec70566540d1a4cf3698e960bfa4.r2.dev/speech/1d7527bc-f396-479d-82c6-771d1c4ee832.mp3',
         },
     ];
 
@@ -133,9 +151,9 @@ export default function Home() {
                             </a>
                         </div>
                         <div className="order-2 md:order-2">
-                           <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                               <img src="/emotional.png" alt="Abstract illustration of sound waves morphing into emotions, representing emotional voice generation." className="rounded-xl w-full h-full object-cover" />
-                           </div>
+                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
+                                <img src="/emotional.png" alt="Abstract illustration of sound waves morphing into emotions, representing emotional voice generation." className="rounded-xl w-full h-full object-cover" />
+                            </div>
                         </div>
 
                         {/* New Feature Block for Multi-Speaker */}
@@ -223,34 +241,59 @@ export default function Home() {
             </section>
 
             {/* Main TTS Interface Section - Modified for showcase */}
-            <section id="voice-generator" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-100">
-                <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
-                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">AI Voice Preview</h2>
-                    <p className="text-gray-600 text-center mb-6">Experience our high-quality AI voice generation with this pre-made audio clip.</p>
+           <section
+  id="voice-generator"
+  className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50"
+>
+  <div className="w-full max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-8 md:p-12 space-y-8">
+    <h2 className="text-4xl font-extrabold text-center text-gray-800">
+      AI Voice Preview
+    </h2>
+    <p className="text-gray-600 text-center max-w-lg mx-auto">
+      Experience our high-quality AI voice generation with this pre-made
+      motivational story.
+    </p>
 
-                    {/* New Audio Player with Wave Animation */}
-                    <div className="flex flex-col items-center space-y-6">
-                        <div className="relative w-full max-w-xl">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                {/* Wave animation - purely decorative, but adds visual interest */}
-                                <div className="absolute w-3/4 h-3/4 animate-pulse-slow">
-                                    <div className="w-full h-full rounded-full bg-indigo-200 opacity-50 absolute animate-wave1"></div>
-                                    <div className="w-full h-full rounded-full bg-purple-200 opacity-50 absolute animate-wave2"></div>
-                                    <div className="w-full h-full rounded-full bg-indigo-300 opacity-50 absolute animate-wave3"></div>
-                                </div>
-                            </div>
-                            <div className="relative z-10 p-4 bg-gray-50 rounded-xl shadow-inner">
-                                <audio controls className="w-full">
-                                    <source src={audioClips[0].url} type="audio/mpeg" />
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        </div>
-                        {/* Display the Hindi dialogue as the text caption */}
-                        <p className="text-center font-medium text-gray-700">{audioClips[0].text}</p>
-                    </div>
-                </div>
-            </section>
+    {/* Audio Player with Wave Animation */}
+    <div className="flex flex-col items-center space-y-6">
+      <div className="relative w-full max-w-md">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {/* Decorative Wave Animation */}
+          <div className="absolute w-3/4 h-3/4 animate-pulse-slow">
+            <div className="w-full h-full rounded-full bg-indigo-200 opacity-40 absolute animate-wave1"></div>
+            <div className="w-full h-full rounded-full bg-purple-200 opacity-40 absolute animate-wave2"></div>
+            <div className="w-full h-full rounded-full bg-indigo-300 opacity-40 absolute animate-wave3"></div>
+          </div>
+        </div>
+        <div className="relative z-10 p-4 bg-gray-50 rounded-2xl shadow-inner">
+          <audio controls className="w-full">
+            <source
+              src={audioClips[0].url}
+              type="audio/mpeg"
+            />
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      </div>
+
+      {/* Story with Expand/Collapse */}
+      <div className="w-full max-w-2xl">
+        <details className="group bg-gray-50 rounded-xl shadow-inner p-4 cursor-pointer">
+          <summary className="flex justify-between items-center font-semibold text-gray-800">
+            <span>Read the story in Hindi</span>
+            <span className="text-indigo-500 group-open:rotate-180 transform transition-transform">
+              ▼
+            </span>
+          </summary>
+          <p className="mt-3 text-gray-700 leading-relaxed max-h-64 overflow-y-auto pr-2">
+            {audioClips[0].text}
+          </p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
 
             {/* Audio Manager Section - Removed since it's not needed */}
 
