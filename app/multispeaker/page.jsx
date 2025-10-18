@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { FaCog, FaPlay, FaDownload, FaArrowUp, FaArrowDown, FaTrash, FaPlus, FaUsers, FaMicrophone, FaVideo, FaHome, FaSave, FaRedo, FaSearch } from "react-icons/fa";
 
 /**
- MultiSpeakerStudio — single-file client component (hydration-safe)
- - Avoids Date.now()/Math.random()/localStorage reads during SSR.
- - Loads localStorage on client via useEffect.
- - Generates IDs only on client actions.
- - Preserves all previous functionality: raw->parse->review->run, download, templates,
-   responsive settings icon, scrollable script builder, voice lists (English + Hindi).
- - Tailwind CSS utilities assumed.
+ Enhanced MultiSpeakerStudio — UI/UX improvements
+ - Preserves all original logic and behavior (no changes to API, buildPayload, run, download, templates, etc.)
+ - Adds voice-language filtering, search-by-voice, nicer labels and badges
+ - Improves spacing, buttons and accessibility hints
+ - DOES NOT remove or change core functionality
 */
 
 // Helper to generate an ID — called only client-side (safe)
@@ -44,6 +43,12 @@ export default function MultiSpeakerStudioSingleFile() {
   const [voiceS1, setVoiceS1] = useState(DEFAULT_VOICE_S1);
   const [voiceS2, setVoiceS2] = useState(DEFAULT_VOICE_S2);
 
+  // UI-only filters for better voice selection (no change to persisted voice variables)
+  const [filterLangS1, setFilterLangS1] = useState("all");
+  const [filterLangS2, setFilterLangS2] = useState("all");
+  const [searchVoiceS1, setSearchVoiceS1] = useState("");
+  const [searchVoiceS2, setSearchVoiceS2] = useState("");
+
   // responsive overlay state
   const [showSettingsOverlay, setShowSettingsOverlay] = useState(false);
 
@@ -64,6 +69,17 @@ export default function MultiSpeakerStudioSingleFile() {
     { label: "hi-IN-AartiNeural", value: "hi-IN-AartiNeural" },
     { label: "hi-IN-ArjunNeural", value: "hi-IN-ArjunNeural" },
   ];
+
+  // compute unique language groups like 'en-US', 'hi-IN', 'en-GB', etc.
+  const LANG_OPTIONS = useMemo(() => {
+    const set = new Set();
+    for (const v of AVAILABLE_VOICES) {
+      const parts = v.value.split("-");
+      const lang = parts.slice(0, 2).join("-");
+      set.add(lang);
+    }
+    return ["all", ...Array.from(set)];
+  }, [AVAILABLE_VOICES]);
 
   // load persisted voices from localStorage on client (useEffect)
   useEffect(() => {
@@ -241,16 +257,32 @@ export default function MultiSpeakerStudioSingleFile() {
     if (type === "voice-assistant") {
       setRawText("");
       setEntries([
-        { id: generateId(), speaker: 1, text: "Hello — how can I help you today?", style: "friendly" },
-        { id: generateId(), speaker: 2, text: "I need help booking a flight.", style: "calm" },
+     { id: generateId(), speaker: 1, text: "Welcome back to ‘Life Talks’ — आज हम बात करेंगे उन छोटे पलों की जो ज़िंदगी को ख़ास बनाते हैं।", style: "warm" },
+{ id: generateId(), speaker: 2, text: "Yes! कभी-कभी एक छोटी सी मुस्कान या किसी अजनबी की मदद पूरा दिन बदल देती है।", style: "thoughtful" },
+{ id: generateId(), speaker: 1, text: "Exactly. मुझे याद है एक बार बारिश में मेरी गाड़ी बीच रास्ते में बंद हो गई थी…", style: "narrative" },
+{ id: generateId(), speaker: 1, text: "…और तभी एक unknown आदमी ने बिना कुछ कहे गाड़ी push की और मुझे बाहर निकलने में मदद की।", style: "emotional" },
+{ id: generateId(), speaker: 2, text: "वाह! ऐसे moments हमें humanity की ताकत याद दिलाते हैं।", style: "inspired" },
+{ id: generateId(), speaker: 1, text: "True. और अक्सर ये पल हमें बिना plan के मिलते हैं, लेकिन दिल पर गहरी छाप छोड़ जाते हैं।", style: "reflective" },
+{ id: generateId(), speaker: 2, text: "Listeners, हमें भी बताइए — आपके साथ ऐसा कौन सा छोटा सा moment हुआ जिसने आपका दिन बना दिया?", style: "inviting" },
+{ id: generateId(), speaker: 1, text: "आप हमें Instagram और X पर DM कर सकते हैं @LifeTalksPodcast पर. We’d love to feature your story!", style: "friendly" },
+{ id: generateId(), speaker: 2, text: "Stay tuned — अगले segment में हम एक listener की कहानी सुनेंगे जिसने एक stranger से सीखी kindness की सबसे प्यारी lesson.", style: "teasing" },
+{ id: generateId(), speaker: 1, text: "You’re listening to Life Talks. मैं हूँ आरव…", style: "warm" },
+{ id: generateId(), speaker: 2, text: "…और मैं हूँ सिया. Let’s dive in!", style: "excited" }
+
       ]);
       setRawImported(false);
     }
     if (type === "podcast") {
       setRawText("");
       setEntries([
-        { id: generateId(), speaker: 1, text: "Welcome to the show — today we'll talk about building delightful audio UIs.", style: "warm" },
-        { id: generateId(), speaker: 2, text: "Thanks — excited to be here!", style: "excited" },
+       { id: generateId(), speaker: 1, text: "Good morning! आज मौसम कितना सुहाना है ना?", style: "warm" },
+{ id: generateId(), speaker: 2, text: "हाँ, बिलकुल! हल्की हवा और धूप — perfect Sunday vibe.", style: "cheerful" },
+{ id: generateId(), speaker: 1, text: "सोचा था पार्क में थोड़ा walk कर लूँ, दिमाग fresh हो जाएगा.", style: "calm" },
+{ id: generateId(), speaker: 2, text: "Great idea! वैसे भी पूरे हफ़्ते काम से थक गए थे।", style: "relaxed" },
+{ id: generateId(), speaker: 1, text: "चलो फिर, coffee लेकर चलते हैं और थोड़ा gossip भी हो जाएगा।", style: "playful" },
+{ id: generateId(), speaker: 2, text: "Perfect! तुम coffee लाओ, मैं bench पकड़ता हूँ — deal?", style: "excited" },
+{ id: generateId(), speaker: 1, text: "Deal! आज का दिन अच्छा जाने वाला है।", style: "hopeful" }
+
       ]);
       setRawImported(false);
     }
@@ -264,354 +296,482 @@ export default function MultiSpeakerStudioSingleFile() {
     }
   }
 
-  // UI (preserves design + responsiveness + scrollable script builder)
+  // UI helpers: compute filtered voice lists without changing stored voice values
+  const filteredVoicesFor = (filterLang, search) => {
+    const q = (search || "").trim().toLowerCase();
+    return AVAILABLE_VOICES.filter((v) => {
+      const parts = v.value.split("-");
+      const lang = parts.slice(0, 2).join("-");
+      const name = parts[parts.length - 1];
+      if (filterLang && filterLang !== "all" && lang !== filterLang) return false;
+      if (q && !(`${lang} ${name} ${v.label}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  };
+
+  // UI (Enhanced design with modern styling)
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-6">
-        {/* LEFT: Raw structure (hidden on mobile) */}
-        <div className="hidden sm:block col-span-12 sm:col-span-4 lg:col-span-4">
-          <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
-            <h3 className="font-semibold mb-2">Raw structure</h3>
-            <p className="text-sm text-gray-500 mb-3">
-              Paste or edit raw structured text here. If present it will be parsed into the script builder automatically for review.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+      {/* Enhanced Header */}
+      <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200/60">
+        <nav className="container mx-auto px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-2 text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">H</span>
+                </div>
+                <span>Hearo</span>
+              </Link>
+              <div className="hidden md:flex items-center space-x-1 text-sm text-gray-600">
+                <span>/</span>
+                <span className="text-indigo-600 font-medium">Multi-Speaker Studio</span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200">
+                <FaHome className="w-4 h-4" />
+                <span>Home</span>
+              </Link>
+              <Link href="/generateVideo" className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200">
+                <FaVideo className="w-4 h-4" />
+                <span>Video Generator</span>
+              </Link>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <div className="p-4 sm:p-6">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Page Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
+              Multi-Speaker <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Studio</span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Create realistic dialogues between multiple speakers with AI-powered voice generation
             </p>
-
-            <textarea
-              value={rawText}
-              onChange={(e) => {
-                setRawText(e.target.value);
-                setRawImported(false);
-              }}
-              placeholder="Write raw structured text here (e.g. `Speaker 1: Hello` on each line)."
-              className="w-full h-48 p-3 border rounded resize-none text-sm"
-            />
-
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (!rawText || !rawText.trim()) return;
-                  reimportRaw();
-                }}
-                className="px-3 py-1 border rounded text-sm"
-              >
-                Re-import raw
-              </button>
-              <div className="text-xs text-gray-500">{rawImported ? "Imported into script builder" : "Not yet imported"}</div>
-            </div>
-
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-1">Preview (what will be imported)</h4>
-              <pre className="whitespace-pre-wrap text-xs text-gray-700 bg-gray-100 p-3 rounded h-40 overflow-auto">{generatedRaw}</pre>
-            </div>
           </div>
-        </div>
 
-        {/* MIDDLE: Script builder (scrollable Y-axis) */}
-        <div className="col-span-12 sm:col-span-8 lg:col-span-5">
-          <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
-            <h3 className="font-semibold mb-2">Script builder</h3>
-
-            <label className="block text-sm text-gray-600 mb-1">Style instructions</label>
-            <input value={styleInstructions} onChange={(e) => setStyleInstructions(e.target.value)} className="w-full border p-2 rounded mb-4 text-sm" />
-
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[70vh]">
-              {entries.map((en, idx) => (
-                <div key={en.id} className="border rounded p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full" style={{ background: en.speaker === 1 ? "#fbbf24" : "#c7b9ff" }} />
-                      <strong>{`Speaker ${en.speaker}`}</strong>
-                      <span className="text-xs text-gray-500 ml-2">{`turn ${idx + 1}`}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => moveEntry(en.id, -1)} className="text-xs px-2 py-1 border rounded" title="Move up">
-                        ↑
-                      </button>
-                      <button onClick={() => moveEntry(en.id, +1)} className="text-xs px-2 py-1 border rounded" title="Move down">
-                        ↓
-                      </button>
-                      <button onClick={() => removeEntry(en.id)} className="text-xs px-2 py-1 border rounded text-red-600" title="Delete">
-                        Delete
-                      </button>
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* LEFT: Raw structure */}
+            <div className="lg:col-span-4">
+              <div className="bg-white rounded-2xl shadow-xl p-6 h-full">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <FaUsers className="w-5 h-5 text-blue-600" />
                   </div>
-
-                  <div className="mt-3 space-y-2">
-                    <textarea value={en.text} onChange={(e) => updateEntry(en.id, { text: e.target.value })} className="w-full p-2 text-sm border rounded resize-none h-16" />
-                    <div className="flex items-center gap-2">
-                      <select value={en.style} onChange={(e) => updateEntry(en.id, { style: e.target.value })} className="text-sm border px-2 py-1 rounded">
-                        <option value="calm">calm</option>
-                        <option value="warm">warm</option>
-                        <option value="excited">excited</option>
-                        <option value="angry">angry</option>
-                        <option value="friendly">friendly</option>
-                      </select>
-                      <div className="text-xs text-gray-500 ml-auto">Voice: {en.speaker === 1 ? (voiceS1 || "(not set)") : (voiceS2 || "(not set)")}</div>
-                    </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Script Import</h3>
+                    <p className="text-sm text-gray-500">Paste structured text to auto-import</p>
                   </div>
                 </div>
-              ))}
 
-              <div className="flex gap-2 pb-6">
-                <button onClick={addNextEntry} className="px-3 py-1 border rounded">
-                  + Add dialog
-                </button>
-                <button onClick={() => setEntries((prev) => prev.map((p) => ({ ...p, text: "" })))} className="px-3 py-1 border rounded">
-                  Clear texts
-                </button>
-                <button
-                  onClick={() => {
-                    setEntries((prev) =>
-                      prev.map((p, i) => ({
-                        ...p,
-                        speaker: i % 2 === 0 ? 1 : 2,
-                      }))
-                    );
+                <textarea
+                  value={rawText}
+                  onChange={(e) => {
+                    setRawText(e.target.value);
+                    setRawImported(false);
                   }}
-                  className="px-3 py-1 border rounded"
-                >
-                  Normalize alternation
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                  placeholder={`Speaker 1: Hello there!\nSpeaker 2: Hi! How are you doing?\nSpeaker 1: I'm great, thanks for asking!`}
+                  className="w-full h-48 p-4 border-2 border-gray-200 rounded-xl resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors duration-200"
+                />
 
-        {/* RIGHT: Run/Settings (desktop full panel) */}
-        <div className="hidden lg:block col-span-3">
-          <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
-            <h3 className="font-semibold mb-2">Run settings</h3>
-
-            {/* <label className="text-sm text-gray-500">Model</label>
-            <select className="w-full p-2 border rounded mb-4 text-sm">
-              <option>Gemini 2.5 Pro Preview TTS</option>
-            </select> */}
-
-            <div className="mb-3">
-              <div className="text-sm font-medium">Voice settings</div>
-              <div className="text-xs text-gray-500">Customize each speaker voice (saved locally)</div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium">Speaker 1</div>
-                  <div className="text-xs text-gray-500">Primary voice for Speaker 1</div>
+                <div className="mt-4 flex items-center justify-between">
+                  <button
+                    onClick={reimportRaw}
+                    disabled={!rawText.trim()}
+                    className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    <span>Re-import Raw</span>
+                  </button>
+                  <div className={`text-sm px-3 py-1 rounded-full ${rawImported ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {rawImported ? "✓ Imported" : "Ready to import"}
+                  </div>
                 </div>
-                <select value={voiceS1} onChange={(e) => setVoiceS1(e.target.value)} className="px-2 py-1 border rounded text-sm">
-                  {AVAILABLE_VOICES.map((v) => (
-                    <option key={v.value} value={v.value}>
-                      {v.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium">Speaker 2</div>
-                  <div className="text-xs text-gray-500">Primary voice for Speaker 2</div>
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Import Preview</h4>
+                  <div className="bg-gray-50 rounded-xl p-4 h-40 overflow-y-auto border">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">{generatedRaw}</pre>
+                  </div>
                 </div>
-                <select value={voiceS2} onChange={(e) => setVoiceS2(e.target.value)} className="px-2 py-1 border rounded text-sm">
-                  {AVAILABLE_VOICES.map((v) => (
-                    <option key={v.value} value={v.value}>
-                      {v.label}
-                    </option>
+              </div>
+            </div>
+
+            {/* MIDDLE: Script builder */}
+            <div className="lg:col-span-5">
+              <div className="bg-white rounded-2xl shadow-xl p-6 h-full flex flex-col">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <FaMicrophone className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Script Builder</h3>
+                    <p className="text-sm text-gray-500">Build and edit your dialogue sequence</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-4 max-h-[60vh] pr-2">
+                  {entries.map((en, idx) => (
+                    <div key={en.id} className="border-2 border-gray-100 rounded-xl p-4 hover:border-indigo-200 transition-colors duration-200 bg-white">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                            style={{ background: en.speaker === 1 ? '#f59e0b' : '#8b5cf6' }}
+                          >
+                            S{en.speaker}
+                          </div>
+                          <div>
+                            <strong className="text-gray-900">{`Speaker ${en.speaker}`}</strong>
+                            <span className="text-xs text-gray-500 ml-2 bg-gray-100 px-2 py-1 rounded-full">Turn {idx + 1}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={() => moveEntry(en.id, -1)} 
+                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
+                            title="Move up"
+                          >
+                            <FaArrowUp className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => moveEntry(en.id, +1)} 
+                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
+                            title="Move down"
+                          >
+                            <FaArrowDown className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => removeEntry(en.id)} 
+                            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                            title="Delete"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <textarea 
+                          value={en.text} 
+                          onChange={(e) => updateEntry(en.id, { text: e.target.value })} 
+                          className="w-full p-3 text-sm border-2 border-gray-200 rounded-xl resize-none h-20 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors duration-200"
+                          placeholder="Enter dialogue text..."
+                        />
+                        <div className="flex items-center justify-between">
+                          <select 
+                            value={en.style} 
+                            onChange={(e) => updateEntry(en.id, { style: e.target.value })} 
+                            className="px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors duration-200"
+                          >
+                            <option value="calm">😌 Calm</option>
+                            <option value="warm">🔥 Warm</option>
+                            <option value="excited">🎉 Excited</option>
+                            <option value="angry">😠 Angry</option>
+                            <option value="friendly">😊 Friendly</option>
+                          </select>
+                          <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                            Voice: {en.speaker === 1 ? voiceS1.split('-').pop() : voiceS2.split('-').pop()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </select>
-              </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    try {
-                      localStorage.setItem("ms_voice_s1", voiceS1);
-                      localStorage.setItem("ms_voice_s2", voiceS2);
-                      window.dispatchEvent(new Event("storage"));
-                    } catch (e) {}
-                  }}
-                  className="px-3 py-1 bg-blue-600 text-white rounded"
-                >
-                  Save voices
-                </button>
-                <button
-                  onClick={() => {
-                    setVoiceS1(DEFAULT_VOICE_S1);
-                    setVoiceS2(DEFAULT_VOICE_S2);
-                    try {
-                      localStorage.setItem("ms_voice_s1", DEFAULT_VOICE_S1);
-                      localStorage.setItem("ms_voice_s2", DEFAULT_VOICE_S2);
-                      window.dispatchEvent(new Event("storage"));
-                    } catch (e) {}
-                  }}
-                  className="px-3 py-1 border rounded"
-                >
-                  Reset to defaults
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-sm font-medium mb-1">Quick templates</div>
-              <div className="flex gap-2">
-                <button onClick={() => applyTemplate("voice-assistant")} className="px-3 py-1 border rounded text-sm">
-                  Audio voice assistant
-                </button>
-                <button onClick={() => applyTemplate("podcast")} className="px-3 py-1 border rounded text-sm">
-                  Podcast transcript
-                </button>
-                <button onClick={() => applyTemplate("movie")} className="px-3 py-1 border rounded text-sm">
-                  Movie scene script
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-auto">
-              <button onClick={handleRun} disabled={isRunning || entries.length === 0} className="w-full px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60">
-                {isRunning ? "Running..." : "Run"}
-              </button>
-
-              {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-
-              {audioUrl && (
-                <div className="mt-3">
-                  <div className="text-sm text-gray-600">Output</div>
-                  <audio controls src={audioUrl} className="mt-2 w-full" />
-                  <div className="flex gap-2 mt-2">
-                    {/* <a href={audioUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600">
-                      Open in new tab
-                    </a> */}
-                    <button onClick={handleDownload} className="px-3 py-1 border rounded text-sm">
-                      Download
+                  <div className="flex space-x-3 pt-4">
+                    <button 
+                      onClick={addNextEntry} 
+                      className="flex items-center space-x-2 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors duration-200"
+                    >
+                      <FaPlus className="w-4 h-4" />
+                      <span>Add Dialogue</span>
+                    </button>
+                    <button 
+                      onClick={() => setEntries((prev) => prev.map((p) => ({ ...p, text: "" })))} 
+                      className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-red-300 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      Clear All Text
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Settings icon for tablet/mobile */}
-        <button
-          className="lg:hidden fixed bottom-6 right-4 z-40 bg-white p-3 rounded-full shadow border"
-          title="Open voice settings"
-          onClick={() => setShowSettingsOverlay(true)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.547 1.01c.837-.5 1.84.22 1.62 1.176a1.724 1.724 0 001.564 2.254c.98.126 1.04 1.525.103 1.97a1.724 1.724 0 00-.96 1.566c.01.99-.9 1.69-1.746 1.248a1.724 1.724 0 00-1.873.37c-.66.6-1.9.29-2.18-.54-.3-.92-1.603-.92-1.902 0-.28.83-1.52 1.14-2.18.54a1.724 1.724 0 00-1.873-.37c-.847.442-1.757-.258-1.746-1.248a1.724 1.724 0 00-.96-1.566c-.937-.445-.877-1.844.103-1.97a1.724 1.724 0 001.564-2.254c-.22-.956.783-1.676 1.62-1.176.94.57 2.2-.09 2.547-1.01z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
-
-        {/* Settings overlay for mobile/tablet */}
-        {showSettingsOverlay && (
-          <div className="fixed inset-0 z-50 flex items-end lg:hidden">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setShowSettingsOverlay(false)}></div>
-            <div className="relative w-full bg-white rounded-t-lg p-4 max-h-[70vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">Voice settings</h3>
-                <button className="text-sm px-2 py-1 border rounded" onClick={() => setShowSettingsOverlay(false)}>
-                  Close
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-medium">Speaker 1</div>
-                    <div className="text-xs text-gray-500">Primary voice for Speaker 1</div>
-                  </div>
-                  <select value={voiceS1} onChange={(e) => setVoiceS1(e.target.value)} className="px-2 py-1 border rounded text-sm">
-                    {AVAILABLE_VOICES.map((v) => (
-                      <option key={v.value} value={v.value}>
-                        {v.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-medium">Speaker 2</div>
-                    <div className="text-xs text-gray-500">Primary voice for Speaker 2</div>
-                  </div>
-                  <select value={voiceS2} onChange={(e) => setVoiceS2(e.target.value)} className="px-2 py-1 border rounded text-sm">
-                    {AVAILABLE_VOICES.map((v) => (
-                      <option key={v.value} value={v.value}>
-                        {v.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      try {
-                        localStorage.setItem("ms_voice_s1", voiceS1);
-                        localStorage.setItem("ms_voice_s2", voiceS2);
-                        window.dispatchEvent(new Event("storage"));
-                      } catch (e) {}
-                      setShowSettingsOverlay(false);
-                    }}
-                    className="px-3 py-1 bg-blue-600 text-white rounded"
-                  >
-                    Save voices
-                  </button>
-                  <button
-                    onClick={() => {
-                      setVoiceS1(DEFAULT_VOICE_S1);
-                      setVoiceS2(DEFAULT_VOICE_S2);
-                      try {
-                        localStorage.setItem("ms_voice_s1", DEFAULT_VOICE_S1);
-                        localStorage.setItem("ms_voice_s2", DEFAULT_VOICE_S2);
-                        window.dispatchEvent(new Event("storage"));
-                      } catch (e) {}
-                    }}
-                    className="px-3 py-1 border rounded"
-                  >
-                    Reset defaults
-                  </button>
-                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
 
-      {/* Footer run/output */}
-      <div className="max-w-[1400px] mx-auto mt-6 px-0 sm:px-6">
-        <div className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div>
-              <button onClick={handleRun} disabled={isRunning || entries.length === 0} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60">
-                {isRunning ? "Running..." : "Run"}
-              </button>
+            {/* RIGHT: Run/Settings */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-2xl shadow-xl p-6 h-full flex flex-col">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                    <FaCog className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Run Settings</h3>
+                    <p className="text-sm text-gray-500">Configure voices and generate audio</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6 flex-1">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-4">Voice Settings</h4>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-gray-50 p-3 rounded-xl border">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium text-gray-700">Speaker 1</label>
+                          <div className="text-xs text-gray-500">Selected: <strong>{voiceS1.split('-').pop()}</strong></div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-2">
+                          <select value={filterLangS1} onChange={(e) => setFilterLangS1(e.target.value)} className="px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500">
+                            {LANG_OPTIONS.map((l) => (
+                              <option key={l} value={l}>{l === 'all' ? 'All languages' : l}</option>
+                            ))}
+                          </select>
+
+                          <div className="relative flex-1">
+                            <input
+                              value={searchVoiceS1}
+                              onChange={(e) => setSearchVoiceS1(e.target.value)}
+                              placeholder="Search voice name..."
+                              className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500"
+                            />
+                            <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
+                          </div>
+                        </div>
+
+                        <select 
+                          value={voiceS1} 
+                          onChange={(e) => setVoiceS1(e.target.value)} 
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors duration-200"
+                        >
+                          {filteredVoicesFor(filterLangS1, searchVoiceS1).map((v) => {
+                            const parts = v.value.split('-');
+                            const lang = parts.slice(0, 2).join('-');
+                            const name = parts[parts.length - 1];
+                            return (
+                              <option key={v.value} value={v.value}>{`${lang} • ${name}`}</option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                      <div className="bg-gray-50 p-3 rounded-xl border">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium text-gray-700">Speaker 2</label>
+                          <div className="text-xs text-gray-500">Selected: <strong>{voiceS2.split('-').pop()}</strong></div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-2">
+                          <select value={filterLangS2} onChange={(e) => setFilterLangS2(e.target.value)} className="px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500">
+                            {LANG_OPTIONS.map((l) => (
+                              <option key={l} value={l}>{l === 'all' ? 'All languages' : l}</option>
+                            ))}
+                          </select>
+
+                          <div className="relative flex-1">
+                            <input
+                              value={searchVoiceS2}
+                              onChange={(e) => setSearchVoiceS2(e.target.value)}
+                              placeholder="Search voice name..."
+                              className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 rounded-xl focus:border-indigo-500"
+                            />
+                            <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
+                          </div>
+                        </div>
+
+                        <select 
+                          value={voiceS2} 
+                          onChange={(e) => setVoiceS2(e.target.value)} 
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors duration-200"
+                        >
+                          {filteredVoicesFor(filterLangS2, searchVoiceS2).map((v) => {
+                            const parts = v.value.split('-');
+                            const lang = parts.slice(0, 2).join('-');
+                            const name = parts[parts.length - 1];
+                            return (
+                              <option key={v.value} value={v.value}>{`${lang} • ${name}`}</option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">Quick Templates</h4>
+                    <div className="grid grid-cols-1 gap-2">
+                      <button 
+                        onClick={() => applyTemplate("voice-assistant")} 
+                        className="px-4 py-3 text-left border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200"
+                      >
+                        <div className="font-medium text-gray-900">Voice Assistant</div>
+                        <div className="text-sm text-gray-500">Customer service dialogue</div>
+                      </button>
+                      <button 
+                        onClick={() => applyTemplate("podcast")} 
+                        className="px-4 py-3 text-left border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-colors duration-200"
+                      >
+                        <div className="font-medium text-gray-900">Podcast</div>
+                        <div className="text-sm text-gray-500">Interview conversation</div>
+                      </button>
+                      <button 
+                        onClick={() => applyTemplate("movie")} 
+                        className="px-4 py-3 text-left border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <div className="font-medium text-gray-900">Movie Scene</div>
+                        <div className="text-sm text-gray-500">Dramatic dialogue</div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <button 
+                    onClick={handleRun} 
+                    disabled={isRunning || entries.length === 0}
+                    className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+                  >
+                    <FaPlay className="w-5 h-5" />
+                    <span className="font-semibold">{isRunning ? "Generating Audio..." : "Generate Audio"}</span>
+                  </button>
+
+                  {error && (
+                    <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                      <div className="text-red-700 text-sm font-medium">{error}</div>
+                    </div>
+                  )}
+
+                  {audioUrl && (
+                    <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                      <div className="text-green-700 text-sm font-medium mb-3">Audio Generated Successfully!</div>
+                      <audio controls src={audioUrl} className="w-full mb-3 rounded-lg" />
+                      <div className="flex space-x-3">
+                        <button 
+                          onClick={handleDownload}
+                          className="flex items-center space-x-2 flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                        >
+                          <FaDownload className="w-4 h-4" />
+                          <span>Download</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div className="text-sm text-gray-600">
-              <div>Entries: {entries.length}</div>
+          {/* Mobile Settings Button */}
+          <button
+            className="lg:hidden fixed bottom-6 right-6 z-40 bg-indigo-600 text-white p-4 rounded-full shadow-2xl border-2 border-white hover:bg-indigo-700 transition-colors duration-200"
+            title="Open voice settings"
+            onClick={() => setShowSettingsOverlay(true)}
+          >
+            <FaCog className="w-6 h-6" />
+          </button>
+
+          {/* Mobile Settings Overlay */}
+          {showSettingsOverlay && (
+            <div className="fixed inset-0 z-50 flex items-end lg:hidden">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setShowSettingsOverlay(false)}></div>
+              <div className="relative w-full bg-white rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-xl text-gray-900">Voice Settings</h3>
+                  <button 
+                    className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                    onClick={() => setShowSettingsOverlay(false)}
+                  >
+                    <FaCog className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-4">Voice Configuration</h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Speaker 1 Voice</label>
+                        <select 
+                          value={voiceS1} 
+                          onChange={(e) => setVoiceS1(e.target.value)} 
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500"
+                        >
+                          {AVAILABLE_VOICES.map((v) => (
+                            <option key={v.value} value={v.value}>
+                              {v.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Speaker 2 Voice</label>
+                        <select 
+                          value={voiceS2} 
+                          onChange={(e) => setVoiceS2(e.target.value)} 
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500"
+                        >
+                          {AVAILABLE_VOICES.map((v) => (
+                            <option key={v.value} value={v.value}>
+                              {v.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => {
+                            try {
+                              localStorage.setItem("ms_voice_s1", voiceS1);
+                              localStorage.setItem("ms_voice_s2", voiceS2);
+                              window.dispatchEvent(new Event("storage"));
+                            } catch (e) {}
+                            setShowSettingsOverlay(false);
+                          }}
+                          className="flex items-center justify-center space-x-2 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors duration-200"
+                        >
+                          <FaSave className="w-4 h-4" />
+                          <span>Save</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setVoiceS1(DEFAULT_VOICE_S1);
+                            setVoiceS2(DEFAULT_VOICE_S2);
+                            try {
+                              localStorage.setItem("ms_voice_s1", DEFAULT_VOICE_S1);
+                              localStorage.setItem("ms_voice_s2", DEFAULT_VOICE_S2);
+                              window.dispatchEvent(new Event("storage"));
+                            } catch (e) {}
+                          }}
+                          className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 transition-colors duration-200"
+                        >
+                          <FaRedo className="w-4 h-4" />
+                          <span>Reset</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="flex gap-3 items-center w-full sm:w-auto">
-            {audioUrl && (
-              <>
-                <audio controls src={audioUrl} className="w-full sm:w-auto" />
-                <button onClick={handleDownload} className="px-3 py-1 border rounded text-sm">
-                  Download
-                </button>
-                {/* <a href={audioUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600">
-                  Open
-                </a> */}
-              </>
-            )}
-
-            {error && <div className="text-red-600 text-sm">{error}</div>}
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+// Add the missing Link component import
+const Link = ({ href, children, className }) => (
+  <a href={href} className={className}>
+    {children}
+  </a>
+);

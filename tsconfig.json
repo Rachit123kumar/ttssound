@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/api/voices/route.js"  ],
+, "app/api/voices/route.js", "app/admin/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

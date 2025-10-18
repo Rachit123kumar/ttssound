@@ -12,6 +12,7 @@ import {
   X,
   Download,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [languages] = useState([
@@ -115,22 +116,25 @@ export default function Dashboard() {
           </div>
           <nav className="space-y-2">
             {[
-              { icon: <Home className="h-5 w-5" />, label: "Home" },
-              { icon: <Mic className="h-5 w-5" />, label: "Voices" },
-              { icon: <Headphones className="h-5 w-5" />, label: "Text to Speech", active: true },
-              { icon: <Settings className="h-5 w-5" />, label: "Voice Changer" },
-              { icon: <Music className="h-5 w-5" />, label: "Sound Effects" },
-            ].map(({ icon, label, active }) => (
+              { icon: <Home className="h-5 w-5" />,link:'/', label: "Home" },
+              { icon: <Mic className="h-5 w-5" />, link:'/multispeaker', label: "Multispeaker" },
+              { icon: <Headphones className="h-5 w-5" />,link:'/azure', label: "Text to Speech", active: true },
+              // { icon: <Settings className="h-5 w-5" />, label: "Voice Changer" },
+              // { icon: <Music className="h-5 w-5" />, label: "Sound Effects" },
+            ].map(({ icon, label, active,link }) => (
+             <Link href={link} key={label}>
               <button
                 key={label}
+                
                 className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${active
                   ? "bg-pink-50 text-pink-600 font-semibold"
                   : "hover:bg-gray-100 text-gray-700"
                   }`}
-              >
+                  >
                 {icon}
                 <span className={isNavCollapsed ? "hidden" : "block"}>{label}</span>
               </button>
+                </Link>
             ))}
           </nav>
         </div>

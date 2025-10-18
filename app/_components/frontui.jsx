@@ -1,364 +1,368 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import {
+  FaVideo,
+  FaMicrophone,
+  FaUsers,
+  FaHome,
+  FaGithub,
+  FaTwitter,
+  FaLinkedin,
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+} from 'react-icons/fa';
+import { HiMenu, HiX, HiSpeakerphone } from 'react-icons/hi';
 
-// Custom message box function (kept for user feedback on other actions)
+// Toast / status message helper
 const showMessage = (message, type = 'info') => {
-    const existingMsg = document.getElementById('status-message');
-    if (existingMsg) existingMsg.remove();
-
-    const msgDiv = document.createElement('div');
-    msgDiv.id = 'status-message';
-    let bgColor = 'bg-blue-500';
-    if (type === 'error') bgColor = 'bg-red-500';
-    if (type === 'success') bgColor = 'bg-green-500';
-
-    msgDiv.className = `fixed bottom-4 left-1/2 -translate-x-1/2 p-4 rounded-xl text-white font-semibold shadow-lg ${bgColor} z-50 transition-transform duration-300 transform scale-100`;
-    msgDiv.textContent = message;
-    document.body.appendChild(msgDiv);
-
-    setTimeout(() => {
-        msgDiv.style.transform = 'translate(-50%, 100%)';
-        msgDiv.style.opacity = '0';
-        setTimeout(() => msgDiv.remove(), 300);
-    }, 3000);
+  const existing = document.getElementById('status-message');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.id = 'status-message';
+  const color = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-indigo-500';
+  div.className = `fixed bottom-6 left-1/2 -translate-x-1/2 p-3 sm:p-4 rounded-2xl text-white font-semibold shadow-2xl ${color} z-50 animate-pop`;
+  div.textContent = message;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 3000);
 };
 
 export default function Home() {
-    // State for mobile menu
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-    // Hardcoded audio data
-    const audioClips = [
-        {
-            id: 'clip-1',
-            // The Hindi dialogue provided by the user
-            text: `यहाँ एक छोटी प्रेरक कहानी है जिसे आप रील्स के लिए इस्तेमाल कर सकते हैं:
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-मंज़िल की तलाश
-एक छोटे से गाँव में रमेश नाम का एक लड़का रहता था। उसका सपना था कि वह एक दिन एक बड़ा पर्वतारोही बनेगा।
+  const audioClips = [
+    {
+      id: 'clip-1',
+      text: `यहाँ एक छोटी प्रेरक कहानी है जिसे आप रील्स के लिए इस्तेमाल कर सकते हैं...`,
+      url: 'https://pub-105fec70566540d1a4cf3698e960bfa4.r2.dev/speech/1d7527bc-f396-479d-82c6-771d1c4ee832.mp3',
+    },
+  ];
 
-गाँव के लोग उस पर हँसते थे। "तुम? पर्वतारोही? यह तुम्हारे बस की बात नहीं," वे कहते थे। रमेश के पास महँगे उपकरण नहीं थे, और न ही कोई प्रशिक्षण। उसके पास थी तो बस अपनी टूटी-फूटी साइकिल और एक ज़बरदस्त इच्छाशक्ति।
+  const handleDownload = (url, filename) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showMessage('Download started!', 'success');
+  };
 
-एक दिन, उसने अपनी यात्रा शुरू करने का फैसला किया। उसके सामने था एक विशाल, पथरीला पहाड़। पहली कोशिश में वह फिसल गया, उसके घुटनों में चोट लगी, और वह बुरी तरह थक गया। निराशा ने उसे घेर लिया।
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-rose-50 via-sky-50 to-violet-50 antialiased relative overflow-hidden">
+      {/* Decorative colorful blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 rounded-full bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-400 opacity-20 blur-3xl animate-float" />
+      <div className="pointer-events-none absolute -bottom-40 -left-28 w-[420px] h-[420px] rounded-full bg-gradient-to-br from-green-300 via-cyan-300 to-blue-400 opacity-18 blur-3xl animate-float-delayed" />
 
-वह वहीं बैठ गया। तभी उसकी नज़र एक छोटी-सी चींटी पर पड़ी जो अपने से कई गुना भारी दाना लेकर पहाड़ पर चढ़ने की कोशिश कर रही थी। बार-बार वह फिसलती, गिरती, पर हर बार वह उठकर फिर से प्रयास करती।
+      {/* Header */}
+      <header className={`fixed w-full z-50 transition-all ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/60' : 'bg-white/60 backdrop-blur-lg'}`}>
+        <nav className="container mx-auto px-4 py-3 flex items-center justify-between" aria-label="Main navigation">
+          <Link href="/" className="flex items-center space-x-3 text-xl font-extrabold">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-r from-indigo-600 to-pink-500 flex items-center justify-center text-white">H</div>
+            <span className="bg-gradient-to-r from-indigo-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">Hearo</span>
+          </Link>
 
-रमेश ने उस चींटी को देखा और उसे एक प्रेरणा मिली। उसने सोचा, "अगर यह नन्ही-सी जान हार नहीं मान रही, तो मैं क्यों मानूँ?"
+          {/* Desktop nav */}
+          <div className="hidden lg:flex items-center space-x-6 text-sm font-medium">
+            <Link href="/generateVideo" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition">
+              <FaVideo className="w-4 h-4" />
+              <span>Video Generator</span>
+            </Link>
+            <Link href="/multispeaker" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition">
+              <FaUsers className="w-4 h-4" />
+              <span>Multi-Speaker</span>
+            </Link>
+            <Link href="/azure" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition">
+              <FaMicrophone className="w-4 h-4" />
+              <span>Voice Generator</span>
+            </Link>
+            <a href="#features" className="text-gray-700 hover:text-indigo-600 transition">Features</a>
+            <a href="#how-it-works" className="text-gray-700 hover:text-indigo-600 transition">How It Works</a>
+          </div>
 
-उसने अपनी चोटों को अनदेखा किया, अपनी साइकिल को एक तरफ़ रखा, और फिर से चढ़ना शुरू कर दिया। इस बार उसने छोटे-छोटे कदम लिए, पूरी एकाग्रता के साथ। जब भी वह थकने लगता, उसे उस चींटी की लगातार कोशिश याद आती।
+          {/* Mobile button */}
+          <div className="flex items-center lg:hidden">
+            <button
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label="Toggle menu"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100"
+            >
+              {isMenuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+            </button>
+          </div>
+        </nav>
 
-कई दिनों और रातों की मेहनत के बाद, रमेश आखिरकार चोटी पर पहुँच गया। जब उसने नीचे देखा, तो पूरा गाँव एक छोटे से डिब्बे जैसा लग रहा था।
-
-सीख
-ज़िंदगी में सफलता का रास्ता कभी आसान नहीं होता। जब दुनिया कहे 'तुम नहीं कर सकते', तो चींटी की तरह बनो। अपनी मंज़िल पर आँखें रखो, और तब तक कोशिश करो जब तक तुम चोटी पर न पहुँच जाओ। आपकी सबसे बड़ी शक्ति आपकी 'इच्छाशक्ति' है।`,
-            // The new audio URL
-            url: 'https://pub-105fec70566540d1a4cf3698e960bfa4.r2.dev/speech/1d7527bc-f396-479d-82c6-771d1c4ee832.mp3',
-        },
-    ];
-
-    // Placeholder functions since generation is removed
-    const handleGenerateAudio = () => showMessage('Audio generation is currently disabled on the demo.', 'info');
-    const handleMergeSelected = () => showMessage('Audio merging is not available on the demo.', 'info');
-
-    // A simple function to handle the download
-    const handleDownload = (url, filename) => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showMessage('Download started!', 'success');
-    };
-
-    return (
-        <main className="min-h-screen bg-gray-100 antialiased">
-            {/* SEO: Semantic tags and ARIA attributes */}
-            {/* The nav bar has a more descriptive ARIA label for accessibility */}
-            <header className="bg-white shadow-lg fixed w-full z-50">
-                <nav className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center" role="navigation" aria-label="Main navigation">
-                    <div className="flex items-center justify-between">
-                        {/* SEO: Use a strong title for branding */}
-                        <a href="/" className="text-3xl font-extrabold text-indigo-700 tracking-tight" aria-label="Hearo homepage">
-                            Hearo
-                        </a>
-                        <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="text-gray-600 focus:outline-none focus:text-gray-800 md:hidden"
-                            aria-expanded={isMenuOpen}
-                            aria-controls="main-menu"
-                            aria-label="Toggle main menu"
-                        >
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                {isMenuOpen ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                ) : (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                                )}
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div id="main-menu" className={`md:flex items-center space-x-8 mt-4 md:mt-0 ${isMenuOpen ? 'block' : 'hidden'}`}>
-                        {/* New link for the multi-speaker feature */}
-                        <Link href="/multispeaker" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Multi-Speaker</Link>
-                        <Link href="/azure" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Generate</Link>
-                        <a href="#features" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Features</a>
-                        <a href="#how-it-works" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">How It Works</a>
-                        <a href="#contact" className="block mt-4 md:mt-0 text-gray-700 hover:text-indigo-600 transition duration-200 font-medium">Contact</a>
-                    </div>
-                </nav>
-            </header>
-
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white py-24 px-4 sm:px-6 lg:px-8 text-center rounded-b-[40px] shadow-xl">
-                <div className="container mx-auto max-w-4xl">
-                    {/* SEO: H1 for the main topic */}
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Generate AI Voices in Any Mood</h1>
-                    {/* SEO: Meta description-like content in a paragraph */}
-                    <p className="text-lg sm:text-xl lg:text-2xl font-light mb-8 opacity-90">
-                        Create captivating voiceovers for your videos with our easy-to-use AI voice generator.
-                    </p>
-                    <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <Link href="/azure" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
-                            Start Generating
-                        </Link>
-                        {/* New CTA button for multi-speaker */}
-                        <Link href="/multispeaker" className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-white hover:text-indigo-700 transition duration-300 transform hover:scale-105">
-                            Multi-Speaker TTS
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-                <div className="container mx-auto">
-                    {/* SEO: H2 for a major section */}
-                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Features that Elevate Your Content</h2>
-                    <div className="grid md:grid-cols-2 gap-16 lg:gap-24 items-center">
-                        {/* Feature 1 */}
-                        <div className="order-1 md:order-1">
-                            {/* SEO: H3 for sub-sections */}
-                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Emotional Voice Generation</h3>
-                            <p className="text-gray-600 mb-6">
-                                Bring your scripts to life with a range of moods including Laughing, Angry, Cheerful, and Sad. Our AI captures the nuance of human emotion, making your content more engaging.
-                            </p>
-                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
-                                Try Emotional Voices &rarr;
-                            </a>
-                        </div>
-                        <div className="order-2 md:order-2">
-                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/emotional.png" alt="Abstract illustration of sound waves morphing into emotions, representing emotional voice generation." className="rounded-xl w-full h-full object-cover" />
-                            </div>
-                        </div>
-
-                        {/* New Feature Block for Multi-Speaker */}
-                        <div className="order-3 md:order-4">
-                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/multispeaker.png" alt="Illustration of two people talking, representing multi-speaker dialogue." className="rounded-xl w-full h-full object-cover" />
-                            </div>
-                        </div>
-                        <div className="order-4 md:order-3">
-                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Multi-Speaker Dialogue</h3>
-                            <p className="text-gray-600 mb-6">
-                                Create realistic conversations for your videos, podcasts, and audiobooks. Our new two-speaker feature allows you to generate dynamic dialogue between distinct voices.
-                            </p>
-                            <Link href="/multispeaker" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
-                                Try Dialogue Generation &rarr;
-                            </Link>
-                        </div>
-
-                        {/* Feature 2 (Original) */}
-                        <div className="order-5 md:order-5">
-                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Easy Text Input</h3>
-                            <p className="text-gray-600 mb-6">
-                                Simply paste your script into our intuitive editor. We make text-to-speech effortless, so you can focus on creating.
-                            </p>
-                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
-                                See How Simple It Is &rarr;
-                            </a>
-                        </div>
-                        <div className="order-6 md:order-6">
-                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/texttosound.png" alt="Illustration of easy text input field, showing the simplicity of our text-to-speech process." className="rounded-xl w-full h-full object-cover" />
-                            </div>
-                        </div>
-
-                        {/* Feature 3 (Original) */}
-                        <div className="order-7 md:order-7">
-                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Preview and Download</h3>
-                            <p className="text-gray-600 mb-6">
-                                Listen to your generated audio instantly. Download your clips as a single, high-quality WAV file, ready for your video projects.
-                            </p>
-                            <a href="/azure" className="text-indigo-600 font-semibold hover:text-indigo-800 transition duration-200">
-                                Check Downloads Manager &rarr;
-                            </a>
-                        </div>
-                        <div className="order-8 md:order-8">
-                            <div className="bg-gray-200 rounded-2xl h-64 flex items-center justify-center p-4">
-                                <img src="/previw.png" alt="Person listening to audio with headphones and a download icon, illustrating the preview and download feature." className="rounded-xl w-full h-full object-cover" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* How It Works Section */}
-            <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-                <div className="container mx-auto text-center max-w-5xl">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-12">How It Works</h2>
-                    <div className="grid md:grid-cols-3 gap-12">
-                        {/* Step 1 */}
-                        <div className="flex flex-col items-center">
-                            <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/previwand.png" alt="Step 1: Write your script." className="rounded-xl" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Write Your Script</h3>
-                            <p className="text-gray-600">Simply type or paste the text or dialogue you want to convert to speech. No complex setup required.</p>
-                        </div>
-                        {/* Step 2 */}
-                        <div className="flex flex-col items-center">
-                            <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/voicetone.png" alt="Step 2: Choose your voice and mood." className="rounded-xl" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Choose Your Voice & Mood</h3>
-                            <p className="text-gray-600">Select from a variety of voices and apply a mood like Happy, Sad, or Angry to your text. Choose two for dialogue!</p>
-                        </div>
-                        {/* Step 3 */}
-                        <div className="flex flex-col items-center">
-                            <div className="bg-white p-6 rounded-3xl shadow-lg mb-6">
-                                <img src="/previwhow.png" alt="Step 3: Generate and download your audio." className="rounded-xl" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Generate & Download</h3>
-                            <p className="text-gray-600">Click generate and download your high-quality audio file instantly. Merge multiple clips if needed.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Main TTS Interface Section - Modified for showcase */}
-           <section
-  id="voice-generator"
-  className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50"
->
-  <div className="w-full max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-8 md:p-12 space-y-8">
-    <h2 className="text-4xl font-extrabold text-center text-gray-800">
-      AI Voice Preview
-    </h2>
-    <p className="text-gray-600 text-center max-w-lg mx-auto">
-      Experience our high-quality AI voice generation with this pre-made
-      motivational story.
-    </p>
-
-    {/* Audio Player with Wave Animation */}
-    <div className="flex flex-col items-center space-y-6">
-      <div className="relative w-full max-w-md">
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/* Decorative Wave Animation */}
-          <div className="absolute w-3/4 h-3/4 animate-pulse-slow">
-            <div className="w-full h-full rounded-full bg-indigo-200 opacity-40 absolute animate-wave1"></div>
-            <div className="w-full h-full rounded-full bg-purple-200 opacity-40 absolute animate-wave2"></div>
-            <div className="w-full h-full rounded-full bg-indigo-300 opacity-40 absolute animate-wave3"></div>
+        {/* Mobile menu */}
+        <div id="mobile-menu" className={`lg:hidden transition-all ${isMenuOpen ? 'max-h-screen visible py-4 border-t border-gray-200' : 'max-h-0 overflow-hidden'}`}>
+          <div className="container mx-auto px-4 flex flex-col gap-3">
+            <Link href="/generateVideo" className="p-3 rounded-xl bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-medium flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
+              <FaVideo className="w-5 h-5" /> <span>Video Generator</span>
+            </Link>
+            <Link href="/multispeaker" className="p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
+              <FaUsers className="w-5 h-5" /> <span>Multi-Speaker</span>
+            </Link>
+            <Link href="/azure" className="p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
+              <FaMicrophone className="w-5 h-5" /> <span>Voice Generator</span>
+            </Link>
+            <a href="#features" onClick={() => setIsMenuOpen(false)} className="p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2">
+              <HiSpeakerphone className="w-5 h-5" /> <span>Features</span>
+            </a>
+            <a href="#how-it-works" onClick={() => setIsMenuOpen(false)} className="p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2">
+              <FaHome className="w-5 h-5" /> <span>How It Works</span>
+            </a>
           </div>
         </div>
-        <div className="relative z-10 p-4 bg-gray-50 rounded-2xl shadow-inner">
-          <audio controls className="w-full">
-            <source
-              src={audioClips[0].url}
-              type="audio/mpeg"
-            />
-            Your browser does not support the audio element.
-          </audio>
+      </header>
+
+      {/* Hero */}
+      <section className="relative pt-28 pb-16 sm:pt-32 sm:pb-24 px-4">
+        <div className="container mx-auto max-w-6xl text-center">
+          <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[40px] p-10 sm:p-16 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/10 rounded-[40px]" />
+            <div className="relative z-10">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
+                Transform Text into <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">Engaging Content</span>
+              </h1>
+              <p className="text-sm sm:text-lg max-w-3xl mx-auto opacity-95 mb-6">Create captivating voiceovers and stunning videos with our AI-powered generators</p>
+
+              <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
+                <Link href="/video-generator" className="group relative inline-flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-2xl shadow-2xl hover:scale-105 transform transition-all">
+                  <FaVideo className="w-4 h-4 mr-2" /> <span>Create Videos</span>
+                </Link>
+                <Link href="/azure" className="inline-flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 text-white font-bold py-3 px-6 rounded-2xl shadow transition-all hover:scale-105">
+                  <FaMicrophone className="w-4 h-4 mr-2" /> <span>Generate Voices</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* subtle decorative shapes inside hero */}
+            <div className="absolute -right-20 -top-16 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute -left-28 -bottom-20 w-72 h-72 bg-white/5 rounded-full blur-2xl" />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Story with Expand/Collapse */}
-      <div className="w-full max-w-2xl">
-        <details className="group bg-gray-50 rounded-xl shadow-inner p-4 cursor-pointer">
-          <summary className="flex justify-between items-center font-semibold text-gray-800">
-            <span>Read the story in Hindi</span>
-            <span className="text-indigo-500 group-open:rotate-180 transform transition-transform">
-              ▼
-            </span>
-          </summary>
-          <p className="mt-3 text-gray-700 leading-relaxed max-h-64 overflow-y-auto pr-2">
-            {audioClips[0].text}
-          </p>
-        </details>
-      </div>
-    </div>
-  </div>
-</section>
+      {/* Features */}
+      <section id="features" className="py-14 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">Powerful Features for Creators</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Everything you need to create professional audio and video content</p>
+          </div>
 
-
-            {/* Audio Manager Section - Removed since it's not needed */}
-
-            {/* Testimonials Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-                <div className="container mx-auto max-w-5xl text-center">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-12">What Our Creators Say</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {/* Testimonial 1 */}
-                        <div className="bg-white p-6 rounded-3xl shadow-lg">
-                            <p className="text-gray-600 mb-4 italic">"Hearo has transformed my YouTube channel. The emotional voices make my characters feel so real! It's a game-changer for my animation videos."</p>
-                            <div className="font-semibold text-gray-800">- Jane D.</div>
-                        </div>
-                        {/* Testimonial 2 */}
-                        <div className="bg-white p-6 rounded-3xl shadow-lg">
-                            <p className="text-gray-600 mb-4 italic">"The merge feature is a lifesaver. I can create an entire video script's voiceover in minutes without paying for a studio. Highly recommend this for any content creator."</p>
-                            <div className="font-semibold text-gray-800">- Alex R.</div>
-                        </div>
-                        {/* Testimonial 3 */}
-                        <div className="bg-white p-6 rounded-3xl shadow-lg">
-                            <p className="text-gray-600 mb-4 italic">"I use the angry mood for my gaming commentary, and it's perfect. The voice quality is fantastic, and it's incredibly fast. My editing workflow has never been smoother."</p>
-                            <div className="font-semibold text-gray-800">- Chris B.</div>
-                        </div>
-                    </div>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+   
+            <article className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition">
+              <div className="h-40 relative">
+      
+                <img src="https://source.unsplash.com/1200x600/?ai,video" alt="AI video preview" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-pink-500 opacity-30 mix-blend-multiply" />
+                <div className="absolute bottom-4 left-6">
+                  <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-semibold">New Feature</span>
                 </div>
-            </section>
-
-            {/* Final CTA Section */}
-            <section id="contact" className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white py-20 px-4 sm:px-6 lg:px-8 text-center rounded-t-[40px] shadow-xl">
-                <div className="container mx-auto max-w-4xl">
-                    <h2 className="text-4xl font-bold mb-4">Ready to Elevate Your Content?</h2>
-                    <p className="text-lg mb-8 opacity-90">Join thousands of content creators who use Hearo to produce captivating voiceovers.</p>
-                    <a href="#voice-generator" className="inline-block bg-white text-indigo-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
-                        Get Started for Free
-                    </a>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                    <FaVideo className="w-6 h-6 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">AI Video Generation</h3>
                 </div>
-            </section>
+                <p className="text-gray-600 mb-6">Transform your text into engaging videos with AI. Create stunning visual content for social media, marketing, and more.</p>
+                <Link href="/video-generator" className="text-red-500 font-semibold inline-flex items-center gap-2">Start Creating Videos →</Link>
+              </div>
+            </article>
 
-            {/* New CSS for wave animations */}
-            <style jsx>{`
-                @keyframes wave1 {
-                    0% { transform: scale(0.6); opacity: 0.5; }
-                    50% { transform: scale(1); opacity: 0; }
-                    100% { transform: scale(0.6); opacity: 0.5; }
-                }
-                @keyframes wave2 {
-                    0% { transform: scale(0.3); opacity: 0; }
-                    50% { transform: scale(0.8); opacity: 0.5; }
-                    100% { transform: scale(0.3); opacity: 0; }
-                }
-                @keyframes wave3 {
-                    0% { transform: scale(0); opacity: 0.2; }
-                    50% { transform: scale(0.6); opacity: 0.6; }
-                    100% { transform: scale(0); opacity: 0.2; }
-                }
-                .animate-wave1 {
-                    animation: wave1 3s infinite ease-in-out;
-                }
-                .animate-wave2 {
-                    animation: wave2 3s infinite 0.5s ease-in-out;
-                }
-                .animate-wave3 {
-                    animation: wave3 3s infinite 1s ease-in-out;
-                }
-            `}</style>
-        </main>
-    );
+      
+            <article className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition">
+              <div className="h-40 relative">
+                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=60" alt="Conversation illustration" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 opacity-32 mix-blend-multiply" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
+                    <FaUsers className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Multi-Speaker Dialogue</h3>
+                </div>
+                <p className="text-gray-600 mb-6">Create realistic conversations between multiple speakers. Perfect for podcasts, interviews, and storytelling.</p>
+                <Link href="/multispeaker" className="text-indigo-500 font-semibold inline-flex items-center gap-2">Try Dialogue Generation →</Link>
+              </div>
+            </article>
+
+    
+            <article className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition">
+              <div className="h-40 relative">
+                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=60" alt="Microphone and waveform" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 opacity-30 mix-blend-multiply" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <FaMicrophone className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Emotional Voice AI</h3>
+                </div>
+                <p className="text-gray-600 mb-6">Bring your scripts to life with emotional depth. Choose from various tones to match your content's mood perfectly.</p>
+                <Link href="/azure" className="text-emerald-500 font-semibold inline-flex items-center gap-2">Explore Emotions →</Link>
+              </div>
+            </article>
+
+            {/* Feature full-width callout (responsive) */}
+            <div className="md:col-span-2 lg:col-span-3 mt-2">
+              <div className="bg-gradient-to-r from-indigo-50 to-pink-50 border border-gray-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900">All-in-one Creator Suite</h4>
+                  <p className="text-gray-600">Script, voice, and video tools built for creators — export optimized assets for social platforms in one click.</p>
+                </div>
+                <div className="flex gap-3">
+                  <Link href="/video-generator" className="py-2 px-4 rounded-lg font-semibold bg-gradient-to-r from-red-500 to-pink-500 text-white shadow">Try Video</Link>
+                  <Link href="/azure" className="py-2 px-4 rounded-lg font-semibold border border-gray-200">Try Voices</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-12 px-4 sm:px-6 lg:px-8 bg-white/60">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-extrabold text-gray-900">How it works</h3>
+            <p className="text-gray-600">From script to published asset in three simple steps</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow">
+              <div className="w-12 h-12 rounded-md bg-indigo-100 flex items-center justify-center mb-4">1</div>
+              <h4 className="font-bold mb-2">Write or paste script</h4>
+              <p className="text-gray-600 text-sm">Enter your text or import a script — our editor supports timestamps and speaker labels.</p>
+            </div>
+            <div className="p-6 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow">
+              <div className="w-12 h-12 rounded-md bg-pink-100 flex items-center justify-center mb-4">2</div>
+              <h4 className="font-bold mb-2">Choose voices & visuals</h4>
+              <p className="text-gray-600 text-sm">Pick from emotional voice presets and visual templates tailored to each platform.</p>
+            </div>
+            <div className="p-6 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow">
+              <div className="w-12 h-12 rounded-md bg-emerald-100 flex items-center justify-center mb-4">3</div>
+              <h4 className="font-bold mb-2">Export & share</h4>
+              <p className="text-gray-600 text-sm">Export as MP3 / MP4 optimized for Reels, Shorts, or full-resolution downloads.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo / Audio Player */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-4xl">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-6 text-center">
+              <h2 className="text-3xl font-black text-white mb-1">Experience AI Voice Quality</h2>
+              <p className="text-indigo-100">Listen to our premium Hindi voice generation</p>
+            </div>
+            <div className="p-6 md:p-8">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-full max-w-2xl bg-gray-50 rounded-xl p-6 shadow-inner">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse" />
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                    <span className="text-sm font-semibold text-gray-600">Now Playing</span>
+                  </div>
+                  <audio controls className="w-full h-12 rounded-lg bg-white shadow border border-gray-200" src={audioClips[0].url}>
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+
+                <div className="flex gap-4">
+                  <button onClick={() => handleDownload(audioClips[0].url, 'hearo-demo.mp3')} className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-105 transition">
+                    <span>⬇️</span>
+                    <span>Download Demo Audio</span>
+                  </button>
+
+                  <button onClick={() => showMessage('Preview saved to your library!', 'success')} className="inline-flex items-center space-x-2 bg-white border border-gray-200 font-semibold py-3 px-5 rounded-xl">
+                    Save to Library
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div className="lg:col-span-2">
+              <Link href="/" className="flex items-center space-x-3 text-2xl font-bold mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">H</div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Hearo</span>
+              </Link>
+              <p className="text-gray-400 mb-6 max-w-md leading-relaxed">Transform your content creation with AI-powered voice and video generation tools. Create engaging, professional content in minutes.</p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-white"><FaGithub className="w-6 h-6" /></a>
+                <a href="#" className="text-gray-400 hover:text-white"><FaTwitter className="w-6 h-6" /></a>
+                <a href="#" className="text-gray-400 hover:text-white"><FaLinkedin className="w-6 h-6" /></a>
+                <a href="#" className="text-gray-400 hover:text-white"><FaEnvelope className="w-6 h-6" /></a>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-white">Quick Links</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><Link href="/video-generator" className="flex items-center gap-2"> <FaVideo className="w-4 h-4" /> Video Generator</Link></li>
+                <li><Link href="/azure" className="flex items-center gap-2"> <FaMicrophone className="w-4 h-4" /> Voice Generator</Link></li>
+                <li><Link href="/multispeaker" className="flex items-center gap-2"> <FaUsers className="w-4 h-4" /> Multi-Speaker</Link></li>
+                <li><a href="#features" className="flex items-center gap-2">Features</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-white">Contact</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li className="flex items-center gap-3"><FaEnvelope className="w-4 h-4" /> <span>hello@hearo.ai</span></li>
+                <li className="flex items-center gap-3"><FaPhone className="w-4 h-4" /> <span>+1 (555) 123-4567</span></li>
+                <li className="flex items-center gap-3"><FaMapMarkerAlt className="w-4 h-4" /> <span>San Francisco, CA</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Hearo. All rights reserved.</p>
+            <div className="flex space-x-6 text-sm">
+              <a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-white">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-white">Cookies</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* Local styles & animations */}
+      <style jsx>{`
+        @keyframes pop { from { transform: scale(0.9); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+        .animate-pop { animation: pop 0.28s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+        .animate-fadeIn { animation: fadeIn 0.35s ease; }
+
+        @keyframes float { 0% { transform: translateY(0px) } 50% { transform: translateY(-18px) } 100% { transform: translateY(0px) } }
+        .animate-float { animation: float 9s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 11s ease-in-out infinite 3s; }
+      `}</style>
+    </main>
+  );
 }
