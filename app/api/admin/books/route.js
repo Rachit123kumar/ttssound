@@ -1,5 +1,5 @@
 // app/api/admin/books/route.js
-import dbConnect from '../../../../lib/dbConnect';
+import {dbConnect} from '../../../../lib/mongoose';
 import Book from '../../../../models/Book';
 import { normalizeAny } from '../../../../lib/normalize';
 

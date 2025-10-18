@@ -68,7 +68,7 @@ export default async function AdminBooksIndexPage() {
                 <Link href={`/admin/books/${id}`} className="px-3 py-1 border rounded">View chapters</Link>
 
                 {/* Add next chapter -> navigates to create with bookId & chapterIndex */}
-                <Link href={`/admin/create?bookId=${id}&chapterIndex=${nextIndex}`} className="px-3 py-1 bg-green-600 text-white rounded">Add next chapter</Link>
+                <Link href={`/admin/create?bookId=${id}&chapterIndex=${nextIndex}&nameOfBook=${title}`} className="px-3 py-1 bg-green-600 text-white rounded">Add next chapter</Link>
 
                 {/* Edit details -> open create with edit flag so create page can fetch details */}
                 <Link href={`/admin/create?bookId=${id}&edit=true`} className="px-3 py-1 border rounded">Edit details</Link>
